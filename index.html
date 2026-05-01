@@ -920,6 +920,17 @@
   }
 
   /* ── Área do trailer/hero ── */
+  /* Wrapper que engloba modal-hero + botão de mute como siblings.
+     position:relative aqui garante que o absolute do botão
+     se ancora a este contentor, não ao modal-hero (onde o iframe
+     da YT API poderia cobri-lo). */
+  .video-container {
+    position: relative;   /* âncora para o botão mute absoluto */
+    width: 100%;
+    overflow: hidden;     /* mantém o border-radius do topo */
+    border-radius: 12px 12px 0 0;
+  }
+
   .modal-hero {
     position: relative;
     width: 100%;
@@ -962,11 +973,15 @@
     cursor: default;
   }
 
-  /* Badge / botão de som — acima de tudo */
+  /* Badge / botão de som.
+     Agora é filho de .video-container (não do modal-hero),
+     por isso o iframe nunca o apaga nem o cobre.
+     z-index: 50 garante que fica acima do shield (z-index:2)
+     e do iframe (z-index:1) sem qualquer conflito. */
   .modal-mute-badge {
     position: absolute;
     top: 12px; left: 14px;
-    z-index: 30;                  /* alto o suficiente para ficar acima do shield */
+    z-index: 50;               /* bem acima do iframe e do shield */
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1871,23 +1886,65 @@
 <div id="movieModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-container">
 
-    <!-- Cabeçalho: trailer (iframe) ou backdrop (fallback) -->
-    <div class="modal-hero" id="modalHero">
+    <!-- ═══════════════════════════════════════════════════════════
+         VIDEO CONTAINER — wrapper com position:relative.
+         modal-hero  (vídeo/imagem) e o botão de mute são SIBLINGS
+         dentro deste wrapper, por isso o botão nunca é apagado
+         quando a YT API substitui o div interno pelo iframe.
+    ════════════════════════════════════════════════════════════ -->
+    <div class="video-container">
 
-      <!-- Imagem de fallback / backdrop (visível até o trailer carregar) -->
-      <img id="modalThumb" class="modal-trailer-img" src="" alt="Capa do filme" />
+      <!-- Cabeçalho: trailer (iframe) ou backdrop (fallback) -->
+      <div class="modal-hero" id="modalHero">
 
-      <!-- Shield transparente injetado pelo JS sobre o iframe (bloqueia cliques no vídeo) -->
+        <!-- Imagem de fallback / backdrop (visível até o trailer carregar) -->
+        <img id="modalThumb" class="modal-trailer-img" src="" alt="Capa do filme" />
 
-      <!-- Vinheta sobre o vídeo/imagem -->
-      <div class="modal-hero-vignette"></div>
+        <!-- Shield transparente injetado pelo JS sobre o iframe (bloqueia cliques no vídeo) -->
 
-      <!-- Spinner de loading (mostrado enquanto o iframe não arrancou) -->
-      <div class="modal-trailer-loading hidden" id="modalTrailerLoading">
-        <div class="modal-trailer-spinner"></div>
-      </div>
+        <!-- Vinheta sobre o vídeo/imagem -->
+        <div class="modal-hero-vignette"></div>
 
-      <!-- Botão de som — aparece quando há trailer activo -->
+        <!-- Spinner de loading (mostrado enquanto o iframe não arrancou) -->
+        <div class="modal-trailer-loading hidden" id="modalTrailerLoading">
+          <div class="modal-trailer-spinner"></div>
+        </div>
+
+        <!-- Botão fechar -->
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <!-- Botão Play central — visível apenas no modo fallback (sem trailer) -->
+        <button class="modal-play-overlay" id="modalPlayOverlay" aria-label="Reproduzir trailer">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        </button>
+
+        <!-- Título + CTAs sobrepostos na base -->
+        <div class="modal-hero-content">
+          <h2 class="modal-hero-title" id="modalTitle"></h2>
+          <div class="modal-hero-btns">
+            <button class="btn-primary" style="font-size:14px;padding:10px 22px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              Reproduzir
+            </button>
+            <button class="btn-add-list" id="modalAddBtn" aria-label="Adicionar à lista">
+              <!-- Ícone + (estado normal) -->
+              <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <!-- Ícone ✓ (estado adicionado) -->
+              <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20,6 9,17 4,12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div><!-- /modal-hero -->
+
+      <!-- Botão de som — SIBLING do modal-hero, nunca é tocado pela YT API -->
       <button class="modal-mute-badge" id="modalMuteBadge" aria-label="Ativar/desativar som" aria-pressed="true">
         <!-- Ícone: sem som (estado inicial — muted) -->
         <svg id="iconMuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1904,39 +1961,7 @@
         <span id="muteBadgeLabel">SEM SOM</span>
       </button>
 
-      <!-- Botão fechar -->
-      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Fechar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-
-      <!-- Botão Play central — visível apenas no modo fallback (sem trailer) -->
-      <button class="modal-play-overlay" id="modalPlayOverlay" aria-label="Reproduzir trailer">
-        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-      </button>
-
-      <!-- Título + CTAs sobrepostos na base -->
-      <div class="modal-hero-content">
-        <h2 class="modal-hero-title" id="modalTitle"></h2>
-        <div class="modal-hero-btns">
-          <button class="btn-primary" style="font-size:14px;padding:10px 22px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-            Reproduzir
-          </button>
-          <button class="btn-add-list" id="modalAddBtn" aria-label="Adicionar à lista">
-            <!-- Ícone + (estado normal) -->
-            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <!-- Ícone ✓ (estado adicionado) -->
-            <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20,6 9,17 4,12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div><!-- /modal-hero -->
+    </div><!-- /video-container -->
 
     <!-- Corpo: sinopse + metadados -->
     <div class="modal-body">
@@ -2318,31 +2343,40 @@
     setupMuteButton();
   }
 
-  /* ── Configura o listener do botão de som ── */
+  /* ── Configura o listener do botão de som ──
+     Chamado após cada createYTPlayer().
+     O listener é registado UMA SÓ VEZ (flag muteListenerAttached);
+     nas chamadas seguintes apenas repõe o estado visual inicial.
+     Eliminado o cloneNode que apagava os SVG filhos e obrigava
+     a re-lookups frágeis por ID. */
+  let muteListenerAttached = false;
+
   function setupMuteButton() {
     const btn         = document.getElementById('modalMuteBadge');
     const iconMuted   = document.getElementById('iconMuted');
     const iconUnmuted = document.getElementById('iconUnmuted');
     const label       = document.getElementById('muteBadgeLabel');
 
-    /* Repõe sempre o estado inicial (sem som) ao abrir novo trailer */
+    /* Repõe sempre o estado visual inicial (sem som) ao abrir novo trailer */
     btn.classList.remove('unmuted');
     iconMuted.style.display   = '';
     iconUnmuted.style.display = 'none';
     label.textContent         = 'SEM SOM';
     btn.setAttribute('aria-pressed', 'true');
 
-    /* Remove listener anterior para não acumular */
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
+    /* Liga o listener apenas uma vez — evita acumulação de handlers */
+    if (muteListenerAttached) return;
+    muteListenerAttached = true;
 
-    document.getElementById('modalMuteBadge').addEventListener('click', () => {
+    btn.addEventListener('click', () => {
+      /* Sai silenciosamente se o player ainda não existir */
       if (!ytPlayer || typeof ytPlayer.isMuted !== 'function') return;
 
+      /* Re-obtém referências para garantir que estamos sempre no nó certo */
+      const badge  = document.getElementById('modalMuteBadge');
       const iM     = document.getElementById('iconMuted');
       const iU     = document.getElementById('iconUnmuted');
       const lbl    = document.getElementById('muteBadgeLabel');
-      const badge  = document.getElementById('modalMuteBadge');
 
       if (ytPlayer.isMuted()) {
         /* ── Ativar som ── */
