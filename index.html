@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clix — Ver é Sentir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #E5173F;
+    --red-dim: #9B0E29;
+    --red-glow: rgba(229,23,63,0.35);
+    --bg: #080810;
+    --surface: #0F0F1A;
+    --surface2: #161624;
+    --card-bg: #1A1A2E;
+    --text: #F0EEF8;
+    --muted: #8A88A0;
+    --border: rgba(255,255,255,0.07);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-serif: 'DM Serif Display', serif;
+    --nav-h: 68px;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img { display: block; max-width: 100%; }
+  a { text-decoration: none; color: inherit; }
+  button { border: none; cursor: pointer; font-family: var(--font-body); }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--red-dim); border-radius: 3px; }
+
+  /* ══════════════════════════════════════
+     NAVBAR
+  ══════════════════════════════════════ */
+  #navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    padding: 0 4%;
+    gap: 2rem;
+    transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  /* Estado scrollado */
+  #navbar.scrolled {
+    background: rgba(8,8,16,0.88);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  /* Gradiente de topo (visível sem scroll) */
+  #navbar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(8,8,16,0.85) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 0.4s;
+  }
+  #navbar.scrolled::before { opacity: 0; }
+
+  /* Logo */
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    letter-spacing: 0.05em;
+    color: var(--red);
+    flex-shrink: 0;
+    line-height: 1;
+    text-shadow: 0 0 28px var(--red-glow);
+  }
+
+  /* Links centrais */
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    list-style: none;
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(240,238,248,0.75);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    letter-spacing: 0.03em;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  .nav-links a:hover,
+  .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
+  .nav-links a.active { color: var(--red); }
+
+  /* Ações direita */
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .nav-icon-btn {
+    background: none;
+    color: rgba(240,238,248,0.8);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+  }
+  .nav-icon-btn:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+  .nav-icon-btn svg { width: 18px; height: 18px; }
+
+  /* Badge de notificação */
+  .notif-dot {
+    position: absolute;
+    top: 7px; right: 7px;
+    width: 7px; height: 7px;
+    background: var(--red);
+    border-radius: 50%;
+    border: 1.5px solid var(--bg);
+  }
+
+  /* Avatar */
+  .nav-avatar {
+    width: 34px; height: 34px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background: linear-gradient(135deg, #E5173F, #7B0FF0) padding-box,
+                linear-gradient(135deg, #E5173F, #7B0FF0) border-box;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .nav-avatar:hover { box-shadow: 0 0 0 2px var(--red); }
+
+  /* Mobile hamburger */
+  .nav-hamburger {
+    display: none;
+    background: none;
+    color: var(--text);
+    flex-direction: column;
+    gap: 5px;
+    padding: 4px;
+    border-radius: 4px;
+  }
+  .nav-hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: currentColor; border-radius: 2px;
+    transition: all 0.25s;
+  }
+
+  /* Mobile menu */
+  .nav-mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--nav-h); left: 0; right: 0;
+    background: rgba(8,8,16,0.97);
+    backdrop-filter: blur(20px);
+    padding: 1rem 4%;
+    border-bottom: 1px solid var(--border);
+    z-index: 999;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-mobile-menu.open { display: flex; }
+  .nav-mobile-menu a {
+    color: rgba(240,238,248,0.8);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 8px;
+    border-radius: var(--radius);
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .nav-mobile-menu a:last-child { border-bottom: none; }
+  .nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+
+  /* ══════════════════════════════════════
+     HERO SECTION
+  ══════════════════════════════════════ */
+  #hero {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    min-height: 560px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  /* Imagem de fundo */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1800&q=80');
+    background-size: cover;
+    background-position: center 20%;
+    transform: scale(1.03);
+    animation: heroZoom 18s ease-in-out infinite alternate;
+  }
+  @keyframes heroZoom {
+    from { transform: scale(1.03); }
+    to   { transform: scale(1.09) translateX(-1%); }
+  }
+
+  /* Vinhetas */
+  .hero-vignette-sides {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(8,8,16,0.6) 100%);
+    pointer-events: none; z-index: 1;
+  }
+  .hero-vignette-bottom {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 35%,
+      rgba(8,8,16,0.55) 60%,
+      rgba(8,8,16,0.92) 80%,
+      var(--bg) 100%
+    );
+    pointer-events: none; z-index: 2;
+  }
+  .hero-vignette-left {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, rgba(8,8,16,0.75) 0%, transparent 55%);
+    pointer-events: none; z-index: 2;
+  }
+
+  /* Badge "Em Destaque" */
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+  }
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    animation: blink 1.6s infinite;
+  }
+  @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+
+  /* Conteúdo Hero */
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    padding: 0 4% 7%;
+    max-width: 640px;
+    animation: heroFadeUp 1s cubic-bezier(0.25,0.46,0.45,0.94) both;
+    animation-delay: 0.2s;
+  }
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Logotipo do filme (texto estilizado) */
+  .hero-movie-logo {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    color: #fff;
+    text-shadow: 0 2px 40px rgba(0,0,0,0.8);
+    margin-bottom: 16px;
+  }
+
+  /* Meta info (ano, classificação, género) */
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-size: 12px;
+    color: rgba(240,238,248,0.7);
+    font-weight: 400;
+  }
+  .hero-meta-sep { color: rgba(255,255,255,0.25); }
+  .hero-meta-rating {
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: rgba(240,238,248,0.75);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* Sinopse */
+  .hero-synopsis {
+    font-size: clamp(13px, 1.8vw, 15px);
+    color: rgba(240,238,248,0.8);
+    line-height: 1.65;
+    max-width: 500px;
+    margin-bottom: 28px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Botões CTA */
+  .hero-btns {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px var(--red-glow);
+  }
+  .btn-primary:hover {
+    background: #FF1F4A;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(229,23,63,0.5);
+  }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.12);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+  .btn-secondary:active { transform: scale(0.98); }
+
+  /* Indicador de scroll */
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 2.5%;
+    right: 4%;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(240,238,248,0.4);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: heroFadeUp 1s ease both;
+    animation-delay: 0.8s;
+  }
+  .scroll-line {
+    width: 32px; height: 1px;
+    background: currentColor;
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--red);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine { 0% { left:-100% } 100% { left:100% } }
+
+  /* ══════════════════════════════════════
+     SECÇÕES DE LISTAS / SLIDERS
+  ══════════════════════════════════════ */
+  .catalog-section {
+    padding: 0 4% 3rem;
+  }
+  .catalog-section + .catalog-section { padding-top: 0; }
+
+  /* Cabeçalho da secção */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .section-title span {
+    color: var(--red);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    margin-right: 6px;
+  }
+  .section-ver-mais {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .section-ver-mais:hover { color: var(--red); }
+  .section-ver-mais svg { width: 14px; height: 14px; }
+
+  /* Track do carrossel */
+  .row-track-wrap {
+    position: relative;
+  }
+
+  .row-track {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .row-track::-webkit-scrollbar { display: none; }
+
+  /* Botões de navegação do carrossel */
+  .row-arrow {
+    position: absolute;
+    top: 50%; transform: translateY(-55%);
+    z-index: 20;
+    width: 42px; height: 72px;
+    background: rgba(8,8,16,0.85);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    border-radius: 4px;
+    opacity: 0;
+  }
+  .row-track-wrap:hover .row-arrow { opacity: 1; }
+  .row-arrow:hover { background: rgba(229,23,63,0.85); }
+  .row-arrow svg { width: 20px; height: 20px; }
+  .row-arrow.left  { left: -14px; }
+  .row-arrow.right { right: -14px; }
+
+  /* ─── Card de Filme ─── */
+  .movie-card {
+    flex: 0 0 auto;
+    width: clamp(120px, 16vw, 180px);
+    scroll-snap-align: start;
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), z-index 0s;
+    transform-origin: center center;
+  }
+  /* Ampliar no hover e sobrepor */
+  .movie-card:hover {
+    transform: scale(1.12);
+    z-index: 50;
+  }
+
+  /* Imagem da capa */
+  .card-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.3s;
+  }
+  .movie-card:hover .card-poster { filter: brightness(0.45); }
+
+  /* Overlay de informações no hover */
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: linear-gradient(to top, rgba(8,8,16,0.95) 0%, rgba(8,8,16,0.2) 70%, transparent 100%);
+  }
+  .movie-card:hover .card-overlay { opacity: 1; }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .card-meta-dot { color: var(--red); }
+
+  /* Botões mini do card */
+  .card-actions {
+    display: flex;
+    gap: 5px;
+  }
+  .card-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 6px 4px;
+    border-radius: 4px;
+    transition: background 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .card-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .card-btn.play {
+    background: var(--red);
+    color: #fff;
+  }
+  .card-btn.play:hover { background: #FF1F4A; }
+  .card-btn.add {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .card-btn.add:hover { background: rgba(255,255,255,0.22); }
+
+  /* Etiqueta de novidade */
+  .card-new-badge {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: var(--red);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Card de destaque (wide) — primeiro card de cada row */
+  .movie-card.wide {
+    width: clamp(200px, 28vw, 300px);
+  }
+  .movie-card.wide .card-poster {
+    aspect-ratio: 16/9;
+  }
+
+  /* ── Featured Row (Top 10) ── */
+  .top10-card {
+    flex: 0 0 auto;
+    width: clamp(130px, 16vw, 185px);
+    scroll-snap-align: start;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .top10-card:hover { transform: scale(1.08); z-index: 50; }
+
+  .top10-number {
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 9vw, 7rem);
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(255,255,255,0.15);
+    position: absolute;
+    bottom: -8px; left: -10px;
+    z-index: 2;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .top10-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    display: block;
+    margin-left: 30px;
+    transition: filter 0.3s;
+  }
+  .top10-card:hover .top10-poster { filter: brightness(0.5); }
+
+  .top10-overlay {
+    position: absolute;
+    inset: 0;
+    left: 30px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+    background: linear-gradient(to top, rgba(8,8,16,0.9) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .top10-card:hover .top10-overlay { opacity: 1; }
+
+  /* ══════════════════════════════════════
+     PROMO BANNER
+  ══════════════════════════════════════ */
+  .promo-banner {
+    margin: 1rem 4% 3rem;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    height: 160px;
+    background: linear-gradient(135deg, #0F0F1A 0%, #1A0A2E 50%, #0F0F1A 100%);
+    border: 1px solid rgba(229,23,63,0.2);
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem;
+    gap: 2rem;
+  }
+  .promo-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -10%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(229,23,63,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .promo-content { flex: 1; }
+  .promo-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 6px;
+  }
+  .promo-title {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .promo-sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .promo-cta {
+    flex-shrink: 0;
+    background: var(--red);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: var(--radius);
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 4px 20px var(--red-glow);
+    white-space: nowrap;
+  }
+  .promo-cta:hover { background: #FF1F4A; transform: scale(1.03); }
+  .promo-icon {
+    font-size: 5rem;
+    line-height: 1;
+    opacity: 0.08;
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-family: serif;
+  }
+
+  /* ══════════════════════════════════════
+     FOOTER
+  ══════════════════════════════════════ */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 3rem 4% 2rem;
+    margin-top: 2rem;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .footer-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .footer-brand { flex: 1; min-width: 200px; }
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--red);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px var(--red-glow);
+  }
+  .footer-tagline {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 220px;
+    line-height: 1.5;
+  }
+
+  .footer-cols {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+  .footer-col h4 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .footer-col li a {
+    font-size: 13px;
+    color: rgba(240,238,248,0.55);
+    transition: color 0.2s;
+  }
+  .footer-col li a:hover { color: var(--text); }
+
+  /* Social */
+  .footer-social {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .social-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .social-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
+  .social-btn svg { width: 15px; height: 15px; }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-copy {
+    font-size: 12px;
+    color: rgba(240,238,248,0.3);
+  }
+  .footer-legal {
+    display: flex;
+    gap: 18px;
+  }
+  .footer-legal a {
+    font-size: 12px;
+    color: rgba(240,238,248,0.35);
+    transition: color 0.2s;
+  }
+  .footer-legal a:hover { color: var(--text); }
+
+  /* ══════════════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+    .nav-actions .nav-icon-btn:not(:last-child):not(:nth-last-child(2)) { display: none; }
+
+    .hero-content { padding: 0 4% 12%; max-width: 100%; }
+    .hero-synopsis { -webkit-line-clamp: 2; }
+
+    .movie-card { width: clamp(100px, 32vw, 140px); }
+    .movie-card.wide { width: clamp(150px, 45vw, 200px); }
+    .top10-card { width: clamp(100px, 32vw, 140px); }
+
+    .promo-banner { height: auto; padding: 1.5rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .promo-icon { display: none; }
+
+    .footer-top { flex-direction: column; }
+    .footer-cols { gap: 2rem; }
+
+    .row-arrow { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-movie-logo { font-size: 3rem; }
+    .btn-primary, .btn-secondary { font-size: 13px; padding: 10px 18px; }
+  }
+
+  /* ══════════════════════════════════════
+     MODAL DE DETALHES DO FILME
+  ══════════════════════════════════════ */
+
+  /* Backdrop com blur */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0,0,0,0.78);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3vh 16px 48px;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-backdrop.is-open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Contentor principal */
+  .modal-container {
+    background: var(--surface);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 860px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07);
+    transform: translateY(30px) scale(0.97);
+    transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .modal-backdrop.is-open .modal-container {
+    transform: translateY(0) scale(1);
+  }
+
+  /* ── Área do trailer/hero ── */
+  .modal-hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/7;
+    overflow: hidden;
+    background: #000;
+  }
+  .modal-trailer-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .modal-hero-vignette {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.08) 0%,
+      rgba(0,0,0,0.04) 35%,
+      rgba(15,15,26,0.82) 78%,
+      var(--surface) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Botão fechar (X) */
+  .modal-close-btn {
+    position: absolute;
+    top: 14px; right: 14px;
+    z-index: 20;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(8,8,16,0.7);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s, transform 0.18s, border-color 0.2s;
+  }
+  .modal-close-btn:hover {
+    background: var(--red);
+    border-color: var(--red);
+    transform: scale(1.1) rotate(90deg);
+  }
+  .modal-close-btn svg { width: 16px; height: 16px; }
+
+  /* Botão Play central sobre o trailer */
+  .modal-play-overlay {
+    position: absolute;
+    top: 42%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(229,23,63,0.82);
+    border: 3px solid rgba(255,255,255,0.28);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.22s, box-shadow 0.22s;
+    animation: playPulse 2.6s ease-in-out infinite;
+  }
+  .modal-play-overlay:hover {
+    background: var(--red);
+    transform: translate(-50%, -50%) scale(1.12);
+    animation: none;
+    box-shadow: 0 0 28px var(--red-glow);
+  }
+  .modal-play-overlay svg { width: 24px; height: 24px; margin-left: 4px; }
+  @keyframes playPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(229,23,63,0.5); }
+    50%      { box-shadow: 0 0 0 12px rgba(229,23,63,0); }
+  }
+
+  /* Conteúdo sobreposto na base da imagem */
+  .modal-hero-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0 28px 22px;
+    z-index: 11;
+  }
+  .modal-hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    letter-spacing: 0.05em;
+    color: #fff;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .modal-hero-btns {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Botão circular "Adicionar à lista" */
+  .btn-add-list {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.55);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-add-list:hover { background: rgba(255,255,255,0.2); border-color: #fff; transform: scale(1.07); }
+  .btn-add-list.added { background: var(--red); border-color: var(--red); }
+  .btn-add-list svg { width: 18px; height: 18px; }
+  /* Checkmark para estado "adicionado" */
+  .btn-add-list .icon-check { display: none; }
+  .btn-add-list.added .icon-plus { display: none; }
+  .btn-add-list.added .icon-check { display: block; }
+
+  /* ── Corpo: duas colunas ── */
+  .modal-body {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 24px;
+    padding: 22px 28px 4px;
+  }
+
+  /* Meta row */
+  .modal-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .modal-meta-match { color: #46d369; font-size: 13px; font-weight: 600; }
+  .modal-meta-item  { font-size: 13px; color: rgba(240,238,248,0.6); }
+  .modal-meta-rating {
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: rgba(240,238,248,0.75);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  .modal-meta-quality {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: rgba(240,238,248,0.8);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  /* Pills de género */
+  .modal-genre-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .modal-genre-pill {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(240,238,248,0.65);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 3px 11px;
+    border-radius: 20px;
+  }
+
+  /* Sinopse */
+  .modal-synopsis {
+    font-size: 14px;
+    color: rgba(240,238,248,0.78);
+    line-height: 1.75;
+  }
+
+  /* Coluna direita: metadados */
+  .modal-col-meta { display: flex; flex-direction: column; gap: 11px; padding-top: 3px; }
+  .modal-meta-block { font-size: 13px; line-height: 1.55; }
+  .modal-meta-label { color: var(--muted); font-weight: 500; margin-right: 4px; }
+  .modal-meta-value { color: rgba(240,238,248,0.72); }
+
+  /* ── Secção "Também podes gostar" ── */
+  .modal-more { padding: 24px 28px 30px; }
+  .modal-more-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(240,238,248,0.45);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-more-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .modal-more-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.22s ease, border-color 0.2s;
+  }
+  .modal-more-card:hover { transform: scale(1.04); border-color: rgba(255,255,255,0.18); }
+  .modal-more-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+  .modal-more-card-info { padding: 10px 12px 12px; }
+  .modal-more-card-title {
+    font-size: 13px; font-weight: 600;
+    color: var(--text); margin-bottom: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .modal-more-card-meta { font-size: 11px; color: var(--muted); }
+
+  /* ── Responsivo mobile ── */
+  @media (max-width: 640px) {
+    .modal-backdrop { padding: 0; align-items: flex-end; }
+    .modal-container {
+      border-radius: 16px 16px 0 0;
+      max-height: 92svh;
+      overflow-y: auto;
+      transform: translateY(50px);
+    }
+    .modal-backdrop.is-open .modal-container { transform: translateY(0); }
+    .modal-hero { aspect-ratio: 16/9; }
+    .modal-body { grid-template-columns: 1fr; padding: 16px 18px 0; gap: 16px; }
+    .modal-hero-content { padding: 0 18px 16px; }
+    .modal-hero-title { font-size: 1.7rem; }
+    .modal-col-meta { border-top: 1px solid var(--border); padding-top: 14px; }
+    .modal-more { padding: 20px 18px 28px; }
+    .modal-more-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<nav id="navbar">
+  <!-- Logo -->
+  <a href="#" class="nav-logo">CLIX</a>
+
+  <!-- Links centrais (desktop) -->
+  <ul class="nav-links">
+    <li><a href="#" class="active">Início</a></li>
+    <li><a href="#">Séries</a></li>
+    <li><a href="#">Filmes</a></li>
+    <li><a href="#">Bombando</a></li>
+    <li><a href="#">A Minha Lista</a></li>
+  </ul>
+
+  <!-- Ações à direita -->
+  <div class="nav-actions">
+    <!-- Pesquisa -->
+    <button class="nav-icon-btn" aria-label="Pesquisar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    </button>
+    <!-- Notificações -->
+    <button class="nav-icon-btn" aria-label="Notificações" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="notif-dot"></span>
+    </button>
+    <!-- Avatar -->
+    <div class="nav-avatar" title="Perfil">MR</div>
+    <!-- Hamburger (mobile) -->
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Menu mobile -->
+<div class="nav-mobile-menu" id="mobileMenu">
+  <a href="#">Início</a>
+  <a href="#">Séries</a>
+  <a href="#">Filmes</a>
+  <a href="#">Bombando</a>
+  <a href="#">A Minha Lista</a>
+</div>
+
+<!-- ══════════════════════════════════════
+     HERO SECTION
+══════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-vignette-sides"></div>
+  <div class="hero-vignette-left"></div>
+  <div class="hero-vignette-bottom"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Em Destaque Hoje
+    </div>
+
+    <h1 class="hero-movie-logo">NEON<br>HORIZONS</h1>
+
+    <div class="hero-meta">
+      <span class="hero-meta-item">2024</span>
+      <span class="hero-meta-sep">·</span>
+      <span class="hero-meta-rating">M/16</span>
+      <span class="hero-meta-sep">·</span>
+      <span class="hero-meta-item">2h 17min</span>
+      <span class="hero-meta-sep">·</span>
+      <span class="hero-meta-item">Ficção Científica · Ação</span>
+    </div>
+
+    <p class="hero-synopsis">
+      Numa metrópole submersa em luz artificial e sombra, um detetive renegado descobre uma conspiração que pode apagar toda a consciência humana. Com o tempo a esgotar-se, a linha entre realidade e simulação desvanece.
+    </p>
+
+    <div class="hero-btns">
+      <button class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+        Reproduzir
+      </button>
+      <button class="btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Mais Informações
+      </button>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <span class="scroll-line"></span>
+    Explorar catálogo
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     LISTAS DE FILMES
+══════════════════════════════════════ -->
+
+<!-- ── Populares na Clix ── -->
+<section class="catalog-section">
+  <div class="section-header">
+    <h2 class="section-title"><span>▶</span> Populares na Clix</h2>
+    <a href="#" class="section-ver-mais">
+      Ver todos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+  </div>
+  <div class="row-track-wrap">
+    <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <div class="row-track" id="row1">
+      <!-- Os cards são injetados dinamicamente pelo JavaScript (TMDB API) -->
+    </div>
+    <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ── Top 10 Hoje ── -->
+<section class="catalog-section">
+  <div class="section-header">
+    <h2 class="section-title"><span>10</span> Top 10 em Portugal Hoje</h2>
+    <a href="#" class="section-ver-mais">
+      Ver todos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+  </div>
+  <div class="row-track-wrap">
+    <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <div class="row-track" id="row2">
+      <!-- Top 10 cards com número em destaque -->
+      <div class="top10-card">
+        <div class="top10-number">1</div>
+        <img class="top10-poster" src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=75" alt="Abismo" loading="lazy" />
+        <div class="top10-overlay">
+          <div class="card-title" style="font-size:11px;">Abismo</div>
+          <div class="card-actions">
+            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="top10-card">
+        <div class="top10-number">2</div>
+        <img class="top10-poster" src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=400&q=75" alt="Limiar" loading="lazy" />
+        <div class="top10-overlay">
+          <div class="card-title" style="font-size:11px;">Limiar</div>
+          <div class="card-actions">
+            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="top10-card">
+        <div class="top10-number">3</div>
+        <img class="top10-poster" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=75" alt="Vórtice" loading="lazy" />
+        <div class="top10-overlay">
+          <div class="card-title" style="font-size:11px;">Vórtice</div>
+          <div class="card-actions">
+            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="top10-card">
+        <div class="top10-number">4</div>
+        <img class="top10-poster" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=75" alt="Pico Nevado" loading="lazy" />
+        <div class="top10-overlay">
+          <div class="card-title" style="font-size:11px;">Pico Nevado</div>
+          <div class="card-actions">
+            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="top10-card">
+        <div class="top10-number">5</div>
+        <img class="top10-poster" src="https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&q=75" alt="Oceano Negro" loading="lazy" />
+        <div class="top10-overlay">
+          <div class="card-title" style="font-size:11px;">Oceano Negro</div>
+          <div class="card-actions">
+            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="top10-card">
+        <div class="top10-number">6</div>
+        <img class="top10-poster" src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=75" alt="Metrópole" loading="lazy" />
+        <div class="top10-overlay">
+          <div class="card-title" style="font-size:11px;">Metrópole</div>
+          <div class="card-actions">
+            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ── Banner Promo ── -->
+<div class="promo-banner">
+  <div class="promo-content">
+    <div class="promo-label">Clix Premium</div>
+    <div class="promo-title">EXPERIÊNCIA SEM LIMITES</div>
+    <div class="promo-sub">4K Ultra HD · Dolby Atmos · Downloads ilimitados</div>
+  </div>
+  <button class="promo-cta">Experimentar grátis</button>
+  <div class="promo-icon">◈</div>
+</div>
+
+<!-- ── Ação e Aventura ── -->
+<section class="catalog-section">
+  <div class="section-header">
+    <h2 class="section-title"><span>⚡</span> Ação e Aventura</h2>
+    <a href="#" class="section-ver-mais">
+      Ver todos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+  </div>
+  <div class="row-track-wrap">
+    <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <div class="row-track" id="row3">
+      <!-- Os cards são injetados dinamicamente pelo JavaScript (TMDB API) -->
+    </div>
+    <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ── Comédia ── -->
+<section class="catalog-section">
+  <div class="section-header">
+    <h2 class="section-title"><span>😄</span> Comédia</h2>
+    <a href="#" class="section-ver-mais">
+      Ver todos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+  </div>
+  <div class="row-track-wrap">
+    <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <div class="row-track" id="row4">
+      <div class="movie-card">
+        <img class="card-poster" src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=75" alt="Férias Loucas" loading="lazy" />
+        <div class="card-overlay">
+          <div class="card-title">Férias Loucas</div>
+          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
+          <div class="card-actions">
+            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="movie-card">
+        <img class="card-poster" src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=75" alt="O Relógio Mágico" loading="lazy" />
+        <div class="card-overlay">
+          <div class="card-title">O Relógio Mágico</div>
+          <div class="card-meta"><span>2023</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
+          <div class="card-actions">
+            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="movie-card">
+        <img class="card-poster" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=75" alt="Jantar em Caos" loading="lazy" />
+        <div class="card-overlay">
+          <div class="card-title">Jantar em Caos</div>
+          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
+          <div class="card-actions">
+            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="movie-card">
+        <img class="card-poster" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=75" alt="Os Melhores Amigos" loading="lazy" />
+        <div class="card-overlay">
+          <div class="card-title">Os Melhores Amigos</div>
+          <div class="card-meta"><span>2023</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
+          <div class="card-actions">
+            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="movie-card">
+        <img class="card-poster" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=75" alt="A Receita Secreta" loading="lazy" />
+        <div class="card-overlay">
+          <div class="card-title">A Receita Secreta</div>
+          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
+          <div class="card-actions">
+            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+      <div class="movie-card">
+        <img class="card-poster" src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=400&q=75" alt="Palco Louco" loading="lazy" />
+        <div class="card-overlay">
+          <div class="card-title">Palco Louco</div>
+          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
+          <div class="card-actions">
+            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
+            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <!-- Brand -->
+      <div class="footer-brand">
+        <div class="footer-logo">CLIX</div>
+        <p class="footer-tagline">Ver é sentir. A tua plataforma de cinema e séries premium.</p>
+        <div class="footer-social">
+          <!-- Instagram -->
+          <button class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </button>
+          <!-- Twitter/X -->
+          <button class="social-btn" aria-label="Twitter">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </button>
+          <!-- YouTube -->
+          <button class="social-btn" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.2c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.2.7 11.5v2.1c0 2.2.3 4.4.3 4.4S1.3 20 2.2 20.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 22.2 12 22.2 12 22.2s4.2 0 6.8-.3c.6-.1 1.9-.1 3-1.2.9-.9 1.2-2.9 1.2-2.9s.3-2.2.3-4.5v-2c0-2.2-.3-4.3-.3-4.3zm-14 8.5V8.2l8.1 3.7-8.1 3.6z"/>
+            </svg>
+          </button>
+          <!-- TikTok -->
+          <button class="social-btn" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34l-.05-8.4a8.18 8.18 0 004.78 1.52v-3.4a4.85 4.85 0 01-1-.33z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Colunas de links -->
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Navegar</h4>
+          <ul>
+            <li><a href="#">Início</a></li>
+            <li><a href="#">Séries</a></li>
+            <li><a href="#">Filmes</a></li>
+            <li><a href="#">Bombando</a></li>
+            <li><a href="#">A Minha Lista</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Conta</h4>
+          <ul>
+            <li><a href="#">O Meu Perfil</a></li>
+            <li><a href="#">Gerir Subscrição</a></li>
+            <li><a href="#">Dispositivos</a></li>
+            <li><a href="#">Histórico</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Suporte</h4>
+          <ul>
+            <li><a href="#">Centro de Ajuda</a></li>
+            <li><a href="#">Contacto</a></li>
+            <li><a href="#">Termos de Serviço</a></li>
+            <li><a href="#">Privacidade</a></li>
+            <li><a href="#">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rodapé inferior -->
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2024 Clix, Lda. Todos os direitos reservados.</p>
+      <div class="footer-legal">
+        <a href="#">Termos</a>
+        <a href="#">Privacidade</a>
+        <a href="#">Contacto</a>
+        <a href="#">Acessibilidade</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════
+     MODAL DE DETALHES DO FILME
+══════════════════════════════════════ -->
+<div id="movieModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-container">
+
+    <!-- Cabeçalho: imagem/trailer -->
+    <div class="modal-hero">
+      <img id="modalThumb" class="modal-trailer-img" src="" alt="Capa do filme" />
+      <div class="modal-hero-vignette"></div>
+
+      <!-- Botão fechar -->
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Botão Play central (simulação de trailer) -->
+      <button class="modal-play-overlay" aria-label="Reproduzir trailer">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+
+      <!-- Título + CTAs sobrepostos na base -->
+      <div class="modal-hero-content">
+        <h2 class="modal-hero-title" id="modalTitle"></h2>
+        <div class="modal-hero-btns">
+          <button class="btn-primary" style="font-size:14px;padding:10px 22px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            Reproduzir
+          </button>
+          <button class="btn-add-list" id="modalAddBtn" aria-label="Adicionar à lista">
+            <!-- Ícone + (estado normal) -->
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <!-- Ícone ✓ (estado adicionado) -->
+            <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div><!-- /modal-hero -->
+
+    <!-- Corpo: sinopse + metadados -->
+    <div class="modal-body">
+
+      <!-- Coluna esquerda -->
+      <div class="modal-col-main">
+        <div class="modal-meta-row">
+          <span class="modal-meta-match">97% relevante</span>
+          <span id="modalYear"     class="modal-meta-item"></span>
+          <span id="modalRating"   class="modal-meta-rating"></span>
+          <span id="modalDuration" class="modal-meta-item"></span>
+          <span class="modal-meta-quality">4K</span>
+        </div>
+        <div class="modal-genre-pills" id="modalGenrePills"></div>
+        <p class="modal-synopsis" id="modalSynopsis"></p>
+      </div>
+
+      <!-- Coluna direita: metadados textuais -->
+      <div class="modal-col-meta">
+        <div class="modal-meta-block">
+          <span class="modal-meta-label">Elenco:</span>
+          <span class="modal-meta-value" id="modalCast"></span>
+        </div>
+        <div class="modal-meta-block">
+          <span class="modal-meta-label">Géneros:</span>
+          <span class="modal-meta-value" id="modalGenres"></span>
+        </div>
+        <div class="modal-meta-block">
+          <span class="modal-meta-label">Realizador:</span>
+          <span class="modal-meta-value" id="modalDirector"></span>
+        </div>
+        <div class="modal-meta-block">
+          <span class="modal-meta-label">Produção:</span>
+          <span class="modal-meta-value" id="modalStudio"></span>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <!-- Sugestões relacionadas -->
+    <div class="modal-more">
+      <h3 class="modal-more-title">Também podes gostar</h3>
+      <div class="modal-more-grid" id="modalMoreGrid"></div>
+    </div>
+
+  </div><!-- /modal-container -->
+</div><!-- /movieModal -->
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+  /* ════════════════════════════════════════
+     1. NAVBAR — efeito de scroll
+  ════════════════════════════════════════ */
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  /* ════════════════════════════════════════
+     2. HAMBURGER MENU (mobile)
+  ════════════════════════════════════════ */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    const spans  = hamburger.querySelectorAll('span');
+    spans[0].style.transform  = isOpen ? 'rotate(45deg) translate(5px,5px)'   : '';
+    spans[1].style.opacity    = isOpen ? '0' : '';
+    spans[2].style.transform  = isOpen ? 'rotate(-45deg) translate(5px,-5px)' : '';
+  });
+
+  /* ════════════════════════════════════════
+     3. SCROLL DOS CARROSSÉIS
+  ════════════════════════════════════════ */
+  function scrollRow(btn, dir) {
+    const wrap  = btn.closest('.row-track-wrap');
+    const track = wrap.querySelector('.row-track');
+    const card  = track.querySelector('.movie-card, .top10-card');
+    track.scrollBy({ left: dir * (card.offsetWidth + 10) * 3, behavior: 'smooth' });
+  }
+
+  /* ════════════════════════════════════════
+     4. BASE DE DADOS DE FILMES (mock)
+     Cada card do HTML tem data-movie="key".
+     A Hero usa "hero". Cards sem data-movie
+     usam o título + imagem do próprio card.
+  ════════════════════════════════════════ */
+  const MOVIE_DB = {
+    hero: {
+      title    : 'NEON HORIZONS',
+      thumb    : 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&q=80',
+      year     : '2024', rating: 'M/16', duration: '2h 17min',
+      synopsis : 'Numa metrópole submersa em luz artificial e sombra, um detetive renegado descobre uma conspiração que pode apagar toda a consciência humana. Com aliados cada vez mais escassos e o tempo a esgotar-se, a linha entre realidade e simulação dissolve-se numa corrida vertiginosa pela sobrevivência da espécie.',
+      genres   : ['Ficção Científica', 'Ação', 'Neo-Noir'],
+      cast     : 'Zoe Saldana, Oscar Isaac, Lupita Nyong\'o, Adam Driver',
+      director : 'Denis Villeneuve',
+      studio   : 'Clix Originals · A24',
+      similar  : [
+        { title:'Eclipse Final',   year:'2024', genre:'Thriller',  thumb:'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&q=70' },
+        { title:'Código Binário',  year:'2024', genre:'Sci-Fi',    thumb:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=70' },
+        { title:'O Último Bastião',year:'2023', genre:'Sci-Fi',    thumb:'https://images.unsplash.com/photo-1481662622847-3b0e491be7e3?w=600&q=70' },
+      ]
+    }
+  };
+
+  /* Dados genéricos quando o card não tem entrada na DB */
+  function buildGenericMovie(title, thumb, year, genre) {
+    return {
+      title, thumb,
+      year    : year  || '2024',
+      rating  : 'M/12',
+      duration: '1h 48min',
+      synopsis: 'Uma história envolvente que prende o espectador do início ao fim, com personagens complexas e uma narrativa repleta de reviravoltas inesperadas.',
+      genres  : genre ? [genre] : ['Drama'],
+      cast    : 'A definir',
+      director: 'A definir',
+      studio  : 'Clix Originals',
+      similar : [
+        { title:'Sombras do Passado', year:'2023', genre:'Drama',   thumb:'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=600&q=70' },
+        { title:'Fúria Urbana',       year:'2024', genre:'Ação',    thumb:'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=600&q=70' },
+        { title:'Maré Alta',          year:'2024', genre:'Suspense',thumb:'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&q=70' },
+      ]
+    };
+  }
+
+  /* ════════════════════════════════════════
+     5. MODAL — abrir / fechar / preencher
+  ════════════════════════════════════════ */
+  const modalEl     = document.getElementById('movieModal');
+  const modalClose  = document.getElementById('modalCloseBtn');
+  const modalAddBtn = document.getElementById('modalAddBtn');
+  let   addedSet    = new Set(); // guarda títulos já adicionados à lista
+
+  /* Preenche o modal com os dados do filme */
+  function populateModal(data) {
+    document.getElementById('modalThumb').src       = data.thumb;
+    document.getElementById('modalTitle').textContent= data.title;
+    document.getElementById('modalYear').textContent = data.year;
+    document.getElementById('modalRating').textContent= data.rating;
+    document.getElementById('modalDuration').textContent = data.duration;
+    document.getElementById('modalSynopsis').textContent = data.synopsis;
+    document.getElementById('modalCast').textContent     = data.cast;
+    document.getElementById('modalGenres').textContent   = data.genres.join(', ');
+    document.getElementById('modalDirector').textContent = data.director;
+    document.getElementById('modalStudio').textContent   = data.studio;
+
+    /* Pills de género */
+    const pillsEl = document.getElementById('modalGenrePills');
+    pillsEl.innerHTML = data.genres
+      .map(g => `<span class="modal-genre-pill">${g}</span>`).join('');
+
+    /* Estado do botão "Adicionar" */
+    modalAddBtn.classList.toggle('added', addedSet.has(data.title));
+    modalAddBtn.dataset.movieTitle = data.title;
+
+    /* Sugestões relacionadas */
+    const grid = document.getElementById('modalMoreGrid');
+    grid.innerHTML = data.similar.map(s => `
+      <div class="modal-more-card">
+        <img src="${s.thumb}" alt="${s.title}" loading="lazy" />
+        <div class="modal-more-card-info">
+          <div class="modal-more-card-title">${s.title}</div>
+          <div class="modal-more-card-meta">${s.year} · ${s.genre}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  /* Abre o modal */
+  function openModal(movieData) {
+    populateModal(movieData);
+    modalEl.classList.add('is-open');
+    document.body.style.overflow = 'hidden'; /* bloqueia scroll da página */
+    /* Foco no botão fechar para acessibilidade */
+    setTimeout(() => modalClose.focus(), 50);
+    /* Reset scroll interno do modal */
+    modalEl.scrollTop = 0;
+  }
+
+  /* Fecha o modal */
+  function closeModal() {
+    modalEl.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  /* Botão X */
+  modalClose.addEventListener('click', closeModal);
+
+  /* Clique no backdrop (fora do contentor) */
+  modalEl.addEventListener('click', e => {
+    if (e.target === modalEl) closeModal();
+  });
+
+  /* Tecla Escape */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modalEl.classList.contains('is-open')) closeModal();
+  });
+
+  /* Botão "Adicionar à lista" dentro do modal */
+  modalAddBtn.addEventListener('click', () => {
+    const title = modalAddBtn.dataset.movieTitle;
+    if (addedSet.has(title)) {
+      addedSet.delete(title);
+      modalAddBtn.classList.remove('added');
+    } else {
+      addedSet.add(title);
+      modalAddBtn.classList.add('added');
+    }
+  });
+
+  /* ════════════════════════════════════════
+     6. LIGAR TRIGGERS AO MODAL
+  ════════════════════════════════════════ */
+
+  /* Botão "Mais Informações" da Hero Section */
+  document.querySelector('.hero-btns .btn-secondary')
+    .addEventListener('click', () => openModal(MOVIE_DB.hero));
+
+  /* Delegação de eventos: qualquer botão "Lista" / card / card-btn
+     dentro das secções de catálogo */
+  document.addEventListener('click', e => {
+
+    /* Clique no card inteiro (exceto nos botões internos) */
+    const card = e.target.closest('.movie-card, .top10-card');
+    if (card && !e.target.closest('button')) {
+      const title  = card.querySelector('.card-title')?.textContent?.trim()
+                  || card.querySelector('.modal-more-card-title')?.textContent?.trim()
+                  || 'Sem título';
+      const thumb  = card.querySelector('img')?.src || '';
+      const year   = card.querySelector('.card-meta span')?.textContent || '2024';
+      const genre  = card.querySelectorAll('.card-meta span')[2]?.textContent || '';
+      openModal(buildGenericMovie(title, thumb, year, genre));
+      return;
+    }
+
+    /* Clique no botão "Play" de um card → abre modal diretamente */
+    const playBtn = e.target.closest('.card-btn.play');
+    if (playBtn) {
+      e.stopPropagation();
+      const parentCard = playBtn.closest('.movie-card, .top10-card');
+      if (parentCard) {
+        const title = parentCard.querySelector('.card-title')?.textContent?.trim() || 'Sem título';
+        const thumb = parentCard.querySelector('img')?.src || '';
+        const year  = parentCard.querySelector('.card-meta span')?.textContent || '2024';
+        const genre = parentCard.querySelectorAll('.card-meta span')[2]?.textContent || '';
+        openModal(buildGenericMovie(title, thumb, year, genre));
+      }
+      return;
+    }
+
+    /* Clique nos cards de sugestão dentro do modal */
+    const moreCard = e.target.closest('.modal-more-card');
+    if (moreCard) {
+      const title = moreCard.querySelector('.modal-more-card-title')?.textContent || 'Sem título';
+      const thumb = moreCard.querySelector('img')?.src || '';
+      const meta  = moreCard.querySelector('.modal-more-card-meta')?.textContent || '';
+      const [year, genre] = meta.split('·').map(s => s.trim());
+      openModal(buildGenericMovie(title, thumb, year, genre));
+      return;
+    }
+  });
+
+  /* ════════════════════════════════════════
+     TMDB API — INTEGRAÇÃO DINÂMICA
+  ════════════════════════════════════════
+
+  PASSO 1 ─ Regista-te gratuitamente em https://www.themoviedb.org/settings/api
+  PASSO 2 ─ Copia a tua "API Key (v3 auth)" e cola-a abaixo, entre as aspas:
+  ════════════════════════════════════════ */
+
+  const TMDB_API_KEY = 'COLA_AQUI_A_TUA_API_KEY'; // ← ✏️ Substitui este valor
+
+  /* URL base para as imagens de poster do TMDB (tamanho w500 = boa qualidade) */
+  const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+
+  /* Poster de substituição caso um filme não tenha imagem */
+  const TMDB_PLACEHOLDER = 'https://via.placeholder.com/300x450/1A1A2E/E5173F?text=Sem+Poster';
+
+  /* ── Mapa de géneros TMDB (IDs → nomes em português) ── */
+  const GENRE_MAP = {
+    28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia',
+    80: 'Crime', 99: 'Documentário', 18: 'Drama', 10751: 'Família',
+    14: 'Fantasia', 36: 'História', 27: 'Terror', 10402: 'Música',
+    9648: 'Mistério', 10749: 'Romance', 878: 'Ficção Científica',
+    10770: 'Televisão', 53: 'Suspense', 10752: 'Guerra', 37: 'Western'
+  };
+
+  /* Converte um array de IDs de género no primeiro nome (ou 'Filme') */
+  function getGenreName(genreIds) {
+    if (!genreIds || genreIds.length === 0) return 'Filme';
+    return GENRE_MAP[genreIds[0]] || 'Filme';
+  }
+
+  /* ── fetchMovies ─────────────────────────────────────────
+     Faz um pedido assíncrono à API do TMDB.
+     @param {string} endpoint  — ex: '/trending/movie/week'
+     @returns {Promise<Array>} — array de objetos de filme
+  ──────────────────────────────────────────────────────── */
+  async function fetchMovies(endpoint) {
+    const url = `https://api.themoviedb.org/3${endpoint}?api_key=${TMDB_API_KEY}&language=pt-PT`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error(`[TMDB] Erro ${res.status} ao carregar ${endpoint}. Verifica a tua API Key.`);
+        return [];
+      }
+      const data = await res.json();
+      return data.results || [];
+    } catch (err) {
+      console.error('[TMDB] Falha na ligação à API:', err);
+      return [];
+    }
+  }
+
+  /* ── buildMovieCardHTML ──────────────────────────────────
+     Gera o HTML de um .movie-card a partir de um objeto
+     de filme da API do TMDB.
+     @param {Object} movie — objeto retornado pela API
+     @param {boolean} isFirst — se true, aplica classe 'wide'
+                                ao primeiro card de cada row
+     @returns {string} — string HTML do card
+  ──────────────────────────────────────────────────────── */
+  function buildMovieCardHTML(movie, isFirst = false) {
+    /* Título (os filmes usam 'title', as séries usam 'name') */
+    const title = movie.title || movie.name || 'Sem título';
+
+    /* Ano — extraído de 'release_date' ou 'first_air_date' */
+    const year = (movie.release_date || movie.first_air_date || '').slice(0, 4) || '—';
+
+    /* URL do poster; usa placeholder se não houver imagem */
+    const poster = movie.poster_path
+      ? `${TMDB_IMG_BASE}${movie.poster_path}`
+      : TMDB_PLACEHOLDER;
+
+    /* Género principal */
+    const genre = getGenreName(movie.genre_ids);
+
+    /* Classe extra para o primeiro card (layout wide) */
+    const wideClass = isFirst ? ' wide' : '';
+
+    /* SVG reutilizáveis (play e adicionar) */
+    const svgPlay = `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>`;
+    const svgAdd  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+
+    return `
+      <div class="movie-card${wideClass}">
+        <img class="card-poster" src="${poster}" alt="${title}" loading="lazy"
+             onerror="this.src='${TMDB_PLACEHOLDER}'" />
+        <div class="card-overlay">
+          <div class="card-title">${title}</div>
+          <div class="card-meta">
+            <span>${year}</span>
+            <span class="card-meta-dot">·</span>
+            <span>${genre}</span>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn play">${svgPlay}Play</button>
+            <button class="card-btn add">${svgAdd}Lista</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ── renderRow ───────────────────────────────────────────
+     Injeta os cards num .row-track específico.
+     @param {string} rowId   — id do elemento .row-track (ex: 'row1')
+     @param {Array}  movies  — array de filmes vindo da API
+  ──────────────────────────────────────────────────────── */
+  function renderRow(rowId, movies) {
+    const track = document.getElementById(rowId);
+    if (!track) return;
+
+    if (movies.length === 0) {
+      /* Mensagem de erro amigável se a API não retornar nada */
+      track.innerHTML = '<p style="color:var(--muted);padding:1rem;font-size:13px;">Não foi possível carregar os filmes. Verifica a tua API Key do TMDB.</p>';
+      return;
+    }
+
+    /* Gera o HTML de todos os cards e injeta no track */
+    track.innerHTML = movies
+      .map((movie, index) => buildMovieCardHTML(movie, index === 0))
+      .join('');
+  }
+
+  /* ── initTMDB ────────────────────────────────────────────
+     Função principal: dispara os pedidos à API e
+     preenche cada row com os resultados.
+     É chamada automaticamente quando a página carrega.
+  ──────────────────────────────────────────────────────── */
+  async function initTMDB() {
+    /* Verifica se a API Key foi configurada */
+    if (!TMDB_API_KEY || TMDB_API_KEY === 'COLA_AQUI_A_TUA_API_KEY') {
+      console.warn('[TMDB] ⚠️ Insere a tua API Key na variável TMDB_API_KEY no JavaScript.');
+      return;
+    }
+
+    /* Pedidos paralelos para maior eficiência (Promise.all) */
+    const [trending, action] = await Promise.all([
+      fetchMovies('/trending/movie/week'),       /* → row1: Populares na Clix */
+      fetchMovies('/discover/movie?with_genres=28,12&sort_by=popularity.desc') /* → row3: Ação e Aventura (género 28=Ação, 12=Aventura) */
+    ]);
+
+    /* Injeta os resultados nos respetivos carrosséis */
+    renderRow('row1', trending.slice(0, 12)); /* Máx. 12 filmes em tendência */
+    renderRow('row3', action.slice(0, 12));   /* Máx. 12 filmes de ação */
+  }
+
+  /* ── Inicia a integração TMDB quando o DOM estiver pronto ── */
+  initTMDB();
+
+  /* ════════════════════════════════════════
+     7. LAZY LOADING
+  ════════════════════════════════════════ */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); } });
+    }, { rootMargin: '200px' });
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => io.observe(img));
+  }
+</script>
+</body>
+</html>
