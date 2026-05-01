@@ -2008,9 +2008,77 @@
       .join('');
   }
 
+  /* ── renderHero ──────────────────────────────────────────
+     Atualiza a Hero Section com os dados reais do filme #1
+     das Tendências da semana, mantendo todas as classes CSS
+     e vinhetas para que o design continue premium.
+
+     Elementos atualizados:
+       • .hero-bg           → backdrop_path (resolução original)
+       • .hero-movie-logo   → title / name
+       • .hero-synopsis     → overview
+       • .hero-meta-item    → ano de lançamento
+       • Botão "Mais Informações" → abre o modal com dados reais
+  ──────────────────────────────────────────────────────── */
+  function renderHero(movie) {
+    /* ── 1. Imagem de fundo (backdrop em qualidade máxima) ── */
+    const heroBg = document.querySelector('.hero-bg');
+    if (heroBg && movie.backdrop_path) {
+      /* Pré-carrega a imagem antes de a aplicar para evitar flash */
+      const img = new Image();
+      img.onload = () => {
+        heroBg.style.backgroundImage = `url('https://image.tmdb.org/t/p/original${movie.backdrop_path}')`;
+      };
+      img.src = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
+    }
+
+    /* ── 2. Título do filme ── */
+    const heroTitle = document.querySelector('.hero-movie-logo');
+    const title = movie.title || movie.name || 'Sem título';
+    if (heroTitle) {
+      /* Divide o título em duas linhas se tiver mais de uma palavra,
+         para manter o estilo visual em maiúsculas do Bebas Neue */
+      const words = title.toUpperCase().split(' ');
+      const mid   = Math.ceil(words.length / 2);
+      heroTitle.innerHTML = words.length > 1
+        ? `${words.slice(0, mid).join(' ')}<br>${words.slice(mid).join(' ')}`
+        : title.toUpperCase();
+    }
+
+    /* ── 3. Sinopse ── */
+    const heroSynopsis = document.querySelector('.hero-synopsis');
+    if (heroSynopsis && movie.overview) {
+      heroSynopsis.textContent = movie.overview;
+    }
+
+    /* ── 4. Meta-informação: ano de lançamento ── */
+    const year = (movie.release_date || movie.first_air_date || '').slice(0, 4);
+    /* O primeiro .hero-meta-item é sempre o ano */
+    const yearEl = document.querySelector('.hero-meta .hero-meta-item');
+    if (yearEl && year) yearEl.textContent = year;
+
+    /* ── 5. Ligar "Mais Informações" ao modal com dados reais ── */
+    const heroMoreBtn = document.querySelector('.hero-btns .btn-secondary');
+    if (heroMoreBtn) {
+      /* Constrói um objeto compatível com o buildGenericMovie existente */
+      const poster = movie.poster_path
+        ? `${TMDB_IMG_BASE}${movie.poster_path}`
+        : TMDB_PLACEHOLDER;
+      const genre  = getGenreName(movie.genre_ids);
+      const heroMovieData = buildGenericMovie(title, poster, year || '—', genre);
+      /* Substitui a sinopse genérica pela real da API */
+      heroMovieData.synopsis = movie.overview || heroMovieData.synopsis;
+
+      /* Remove o listener antigo (que abria MOVIE_DB.hero) e adiciona o novo */
+      const newBtn = heroMoreBtn.cloneNode(true);
+      heroMoreBtn.parentNode.replaceChild(newBtn, heroMoreBtn);
+      newBtn.addEventListener('click', () => openModal(heroMovieData));
+    }
+  }
+
   /* ── initTMDB ────────────────────────────────────────────
      Função principal: dispara os pedidos à API e
-     preenche cada row com os resultados.
+     preenche a Hero Section + cada row com os resultados.
      É chamada automaticamente quando a página carrega.
   ──────────────────────────────────────────────────────── */
   async function initTMDB() {
@@ -2022,11 +2090,16 @@
 
     /* Pedidos paralelos para maior eficiência (Promise.all) */
     const [trending, action] = await Promise.all([
-      fetchMovies('/trending/movie/week'),       /* → row1: Populares na Clix */
-      fetchMovies('/discover/movie?with_genres=28,12&sort_by=popularity.desc') /* → row3: Ação e Aventura (género 28=Ação, 12=Aventura) */
+      fetchMovies('/trending/movie/week'),       /* → Hero + row1: Populares na Clix */
+      fetchMovies('/discover/movie?with_genres=28,12&sort_by=popularity.desc') /* → row3: Ação e Aventura */
     ]);
 
-    /* Injeta os resultados nos respetivos carrosséis */
+    /* ── Hero Section: usa o filme #1 das Tendências ── */
+    if (trending.length > 0) {
+      renderHero(trending[0]);
+    }
+
+    /* ── Carrosséis: injeta os filmes nos rows ── */
     renderRow('row1', trending.slice(0, 12)); /* Máx. 12 filmes em tendência */
     renderRow('row3', action.slice(0, 12));   /* Máx. 12 filmes de ação */
   }
