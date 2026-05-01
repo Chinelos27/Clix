@@ -1154,6 +1154,158 @@
     .modal-more { padding: 20px 18px 28px; }
     .modal-more-grid { grid-template-columns: repeat(2, 1fr); }
   }
+  /* ══════════════════════════════════════
+     PESQUISA NA NAVBAR
+  ══════════════════════════════════════ */
+
+  /* Contentor que agrupa o botão lupa e o input */
+  .nav-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Caixa de pesquisa (expandível) */
+  .nav-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    padding: 0 12px 0 10px;
+    height: 36px;
+    /* Estado inicial: colapsado (largura 0, invisível) */
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+      width 0.35s cubic-bezier(0.4,0,0.2,1),
+      opacity 0.25s ease,
+      border-color 0.2s;
+  }
+
+  /* Estado aberto */
+  .nav-search-box.open {
+    width: clamp(180px, 22vw, 280px);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .nav-search-box.open:focus-within {
+    border-color: var(--red);
+    background: rgba(229,23,63,0.07);
+  }
+
+  /* Ícone lupa dentro da caixa */
+  .nav-search-icon {
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+    color: var(--muted);
+  }
+
+  /* Input de texto */
+  .nav-search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    min-width: 0;
+  }
+  .nav-search-input::placeholder { color: var(--muted); }
+
+  /* Botão X para limpar */
+  .nav-search-clear {
+    background: none;
+    color: var(--muted);
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .nav-search-clear.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .nav-search-clear:hover { color: var(--red); }
+  .nav-search-clear svg { width: 12px; height: 12px; }
+
+  /* O botão-lupa original fica oculto quando a caixa está aberta */
+  .nav-search-toggle.hidden { opacity: 0; pointer-events: none; width: 0; overflow: hidden; }
+
+  /* ══════════════════════════════════════
+     SECÇÃO DE RESULTADOS DE PESQUISA
+  ══════════════════════════════════════ */
+
+  /* Grid responsivo de resultados */
+  .search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 14vw, 160px), 1fr));
+    gap: 12px;
+    padding-bottom: 4px;
+  }
+
+  /* Estado de loading / sem resultados */
+  .search-state-msg {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .search-state-msg strong { color: var(--text); display: block; font-size: 16px; margin-bottom: 6px; }
+
+  /* Spinner de loading */
+  .search-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Os .movie-card dentro do grid ficam com largura 100% (o grid controla o tamanho) */
+  .search-results-grid .movie-card {
+    width: 100%;
+  }
+
+  /* Animação de entrada dos cards de resultado */
+  .search-results-grid .movie-card {
+    animation: cardFadeIn 0.3s ease both;
+  }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Escalonamento da animação por posição */
+  .search-results-grid .movie-card:nth-child(1)  { animation-delay: 0.02s; }
+  .search-results-grid .movie-card:nth-child(2)  { animation-delay: 0.04s; }
+  .search-results-grid .movie-card:nth-child(3)  { animation-delay: 0.06s; }
+  .search-results-grid .movie-card:nth-child(4)  { animation-delay: 0.08s; }
+  .search-results-grid .movie-card:nth-child(5)  { animation-delay: 0.10s; }
+  .search-results-grid .movie-card:nth-child(6)  { animation-delay: 0.12s; }
+  .search-results-grid .movie-card:nth-child(7)  { animation-delay: 0.14s; }
+  .search-results-grid .movie-card:nth-child(8)  { animation-delay: 0.16s; }
+  .search-results-grid .movie-card:nth-child(n+9) { animation-delay: 0.18s; }
+
+  /* Efeito de transição nas categorias normais ao entrar em modo pesquisa */
+  .catalog-normal-section {
+    transition: opacity 0.25s ease;
+  }
+  .catalog-normal-section.dimmed {
+    opacity: 0.25;
+    pointer-events: none;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
@@ -1176,12 +1328,27 @@
 
   <!-- Ações à direita -->
   <div class="nav-actions">
-    <!-- Pesquisa -->
-    <button class="nav-icon-btn" aria-label="Pesquisar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-    </button>
+    <!-- Barra de Pesquisa -->
+    <div class="nav-search" id="navSearch">
+      <button class="nav-icon-btn nav-search-toggle" id="searchToggle" aria-label="Pesquisar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+      <div class="nav-search-box" id="searchBox">
+        <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="searchInput" class="nav-search-input"
+               placeholder="Títulos, pessoas, géneros…"
+               autocomplete="off" spellcheck="false" />
+        <button class="nav-search-clear" id="searchClear" aria-label="Limpar pesquisa">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
     <!-- Notificações -->
     <button class="nav-icon-btn" aria-label="Notificações" style="position:relative">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1261,11 +1428,24 @@
 </section>
 
 <!-- ══════════════════════════════════════
+     SECÇÃO DE RESULTADOS DE PESQUISA
+     (oculta por omissão; visível durante pesquisa)
+══════════════════════════════════════ -->
+<section class="catalog-section search-results-section" id="searchResultsSection" style="display:none;">
+  <div class="section-header">
+    <h2 class="section-title" id="searchResultsTitle">
+      <span>🔍</span> Resultados para "<span id="searchQueryLabel"></span>"
+    </h2>
+  </div>
+  <div class="search-results-grid" id="searchResultsGrid"></div>
+</section>
+
+<!-- ══════════════════════════════════════
      LISTAS DE FILMES
 ══════════════════════════════════════ -->
 
 <!-- ── Populares na Clix ── -->
-<section class="catalog-section">
+<section class="catalog-section catalog-normal-section">
   <div class="section-header">
     <h2 class="section-title"><span>▶</span> Populares na Clix</h2>
     <a href="#" class="section-ver-mais">
@@ -1287,7 +1467,7 @@
 </section>
 
 <!-- ── Top 10 Hoje ── -->
-<section class="catalog-section">
+<section class="catalog-section catalog-normal-section">
   <div class="section-header">
     <h2 class="section-title"><span>10</span> Top 10 em Portugal Hoje</h2>
     <a href="#" class="section-ver-mais">
@@ -1386,7 +1566,7 @@
 </div>
 
 <!-- ── Ação e Aventura ── -->
-<section class="catalog-section">
+<section class="catalog-section catalog-normal-section">
   <div class="section-header">
     <h2 class="section-title"><span>⚡</span> Ação e Aventura</h2>
     <a href="#" class="section-ver-mais">
@@ -1408,7 +1588,7 @@
 </section>
 
 <!-- ── Comédia ── -->
-<section class="catalog-section">
+<section class="catalog-section catalog-normal-section">
   <div class="section-header">
     <h2 class="section-title"><span>😄</span> Comédia</h2>
     <a href="#" class="section-ver-mais">
@@ -1884,6 +2064,139 @@
       openModal(buildGenericMovie(title, thumb, year, genre));
       return;
     }
+  });
+
+  /* ════════════════════════════════════════
+     PESQUISA — LÓGICA COMPLETA
+  ════════════════════════════════════════ */
+
+  const searchToggle  = document.getElementById('searchToggle');
+  const searchBox     = document.getElementById('searchBox');
+  const searchInput   = document.getElementById('searchInput');
+  const searchClear   = document.getElementById('searchClear');
+  const searchSection = document.getElementById('searchResultsSection');
+  const searchGrid    = document.getElementById('searchResultsGrid');
+  const searchLabel   = document.getElementById('searchQueryLabel');
+  const normalSections = document.querySelectorAll('.catalog-normal-section');
+
+  let searchDebounceTimer = null; /* Temporizador para debounce do input */
+  let searchIsOpen = false;
+
+  /* ── Abre a barra de pesquisa ── */
+  function openSearch() {
+    searchIsOpen = true;
+    searchBox.classList.add('open');
+    searchToggle.classList.add('hidden');
+    /* Pequeno delay para o foco funcionar depois da animação CSS */
+    setTimeout(() => searchInput.focus(), 100);
+  }
+
+  /* ── Fecha a barra e repõe o estado normal ── */
+  function closeSearch() {
+    searchIsOpen = false;
+    searchInput.value = '';
+    searchBox.classList.remove('open');
+    searchToggle.classList.remove('hidden');
+    searchClear.classList.remove('visible');
+    hideSearchResults();
+  }
+
+  /* ── Mostra a secção de resultados e escurece as categorias ── */
+  function showSearchResults() {
+    searchSection.style.display = 'block';
+    normalSections.forEach(s => s.classList.add('dimmed'));
+    /* Scroll suave até aos resultados */
+    searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ── Oculta resultados e repõe categorias ── */
+  function hideSearchResults() {
+    searchSection.style.display = 'none';
+    searchGrid.innerHTML = '';
+    normalSections.forEach(s => s.classList.remove('dimmed'));
+  }
+
+  /* ── Mostra estado de loading no grid ── */
+  function showSearchLoading(query) {
+    searchLabel.textContent = query;
+    searchGrid.innerHTML = `
+      <div class="search-state-msg">
+        <div class="search-spinner"></div>
+        A pesquisar…
+      </div>`;
+    showSearchResults();
+  }
+
+  /* ── Renderiza os resultados da pesquisa no grid ── */
+  function renderSearchResults(movies, query) {
+    searchLabel.textContent = query;
+
+    if (movies.length === 0) {
+      searchGrid.innerHTML = `
+        <div class="search-state-msg">
+          <strong>Sem resultados</strong>
+          Não encontrámos filmes para "${query}". Tenta outro título.
+        </div>`;
+      return;
+    }
+
+    /* Reutiliza buildMovieCardHTML (isFirst=false → nenhum card wide na grelha) */
+    searchGrid.innerHTML = movies
+      .map(movie => buildMovieCardHTML(movie, false))
+      .join('');
+  }
+
+  /* ── Executa a pesquisa na API do TMDB ── */
+  async function performSearch(query) {
+    const q = query.trim();
+    if (!q) { hideSearchResults(); return; }
+
+    showSearchLoading(q);
+
+    const movies = await fetchMovies(`/search/movie?query=${encodeURIComponent(q)}`);
+    renderSearchResults(movies, q);
+  }
+
+  /* ── Event Listeners ── */
+
+  /* Clique na lupa → abre a barra */
+  searchToggle.addEventListener('click', openSearch);
+
+  /* Fechar ao pressionar Escape */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && searchIsOpen) {
+      /* Se o modal estiver aberto, o Escape fecha o modal (já tratado) */
+      if (!document.getElementById('movieModal').classList.contains('is-open')) {
+        closeSearch();
+      }
+    }
+  });
+
+  /* Botão X → limpa e fecha */
+  searchClear.addEventListener('click', () => {
+    closeSearch();
+  });
+
+  /* Clique fora da barra → fecha */
+  document.addEventListener('click', e => {
+    if (searchIsOpen
+        && !e.target.closest('#navSearch')
+        && !e.target.closest('#searchResultsSection')) {
+      closeSearch();
+    }
+  });
+
+  /* Input com debounce de 400ms — evita pedidos a cada tecla */
+  searchInput.addEventListener('input', () => {
+    const val = searchInput.value;
+
+    /* Mostra/oculta o botão X conforme há texto */
+    searchClear.classList.toggle('visible', val.length > 0);
+
+    clearTimeout(searchDebounceTimer);
+    if (!val.trim()) { hideSearchResults(); return; }
+
+    searchDebounceTimer = setTimeout(() => performSearch(val), 400);
   });
 
   /* ════════════════════════════════════════
