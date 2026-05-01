@@ -2067,139 +2067,6 @@
   });
 
   /* ════════════════════════════════════════
-     PESQUISA — LÓGICA COMPLETA
-  ════════════════════════════════════════ */
-
-  const searchToggle  = document.getElementById('searchToggle');
-  const searchBox     = document.getElementById('searchBox');
-  const searchInput   = document.getElementById('searchInput');
-  const searchClear   = document.getElementById('searchClear');
-  const searchSection = document.getElementById('searchResultsSection');
-  const searchGrid    = document.getElementById('searchResultsGrid');
-  const searchLabel   = document.getElementById('searchQueryLabel');
-  const normalSections = document.querySelectorAll('.catalog-normal-section');
-
-  let searchDebounceTimer = null; /* Temporizador para debounce do input */
-  let searchIsOpen = false;
-
-  /* ── Abre a barra de pesquisa ── */
-  function openSearch() {
-    searchIsOpen = true;
-    searchBox.classList.add('open');
-    searchToggle.classList.add('hidden');
-    /* Pequeno delay para o foco funcionar depois da animação CSS */
-    setTimeout(() => searchInput.focus(), 100);
-  }
-
-  /* ── Fecha a barra e repõe o estado normal ── */
-  function closeSearch() {
-    searchIsOpen = false;
-    searchInput.value = '';
-    searchBox.classList.remove('open');
-    searchToggle.classList.remove('hidden');
-    searchClear.classList.remove('visible');
-    hideSearchResults();
-  }
-
-  /* ── Mostra a secção de resultados e escurece as categorias ── */
-  function showSearchResults() {
-    searchSection.style.display = 'block';
-    normalSections.forEach(s => s.classList.add('dimmed'));
-    /* Scroll suave até aos resultados */
-    searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  /* ── Oculta resultados e repõe categorias ── */
-  function hideSearchResults() {
-    searchSection.style.display = 'none';
-    searchGrid.innerHTML = '';
-    normalSections.forEach(s => s.classList.remove('dimmed'));
-  }
-
-  /* ── Mostra estado de loading no grid ── */
-  function showSearchLoading(query) {
-    searchLabel.textContent = query;
-    searchGrid.innerHTML = `
-      <div class="search-state-msg">
-        <div class="search-spinner"></div>
-        A pesquisar…
-      </div>`;
-    showSearchResults();
-  }
-
-  /* ── Renderiza os resultados da pesquisa no grid ── */
-  function renderSearchResults(movies, query) {
-    searchLabel.textContent = query;
-
-    if (movies.length === 0) {
-      searchGrid.innerHTML = `
-        <div class="search-state-msg">
-          <strong>Sem resultados</strong>
-          Não encontrámos filmes para "${query}". Tenta outro título.
-        </div>`;
-      return;
-    }
-
-    /* Reutiliza buildMovieCardHTML (isFirst=false → nenhum card wide na grelha) */
-    searchGrid.innerHTML = movies
-      .map(movie => buildMovieCardHTML(movie, false))
-      .join('');
-  }
-
-  /* ── Executa a pesquisa na API do TMDB ── */
-  async function performSearch(query) {
-    const q = query.trim();
-    if (!q) { hideSearchResults(); return; }
-
-    showSearchLoading(q);
-
-    const movies = await fetchMovies(`/search/movie?query=${encodeURIComponent(q)}`);
-    renderSearchResults(movies, q);
-  }
-
-  /* ── Event Listeners ── */
-
-  /* Clique na lupa → abre a barra */
-  searchToggle.addEventListener('click', openSearch);
-
-  /* Fechar ao pressionar Escape */
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && searchIsOpen) {
-      /* Se o modal estiver aberto, o Escape fecha o modal (já tratado) */
-      if (!document.getElementById('movieModal').classList.contains('is-open')) {
-        closeSearch();
-      }
-    }
-  });
-
-  /* Botão X → limpa e fecha */
-  searchClear.addEventListener('click', () => {
-    closeSearch();
-  });
-
-  /* Clique fora da barra → fecha */
-  document.addEventListener('click', e => {
-    if (searchIsOpen
-        && !e.target.closest('#navSearch')
-        && !e.target.closest('#searchResultsSection')) {
-      closeSearch();
-    }
-  });
-
-  /* Input com debounce de 400ms — evita pedidos a cada tecla */
-  searchInput.addEventListener('input', () => {
-    const val = searchInput.value;
-
-    /* Mostra/oculta o botão X conforme há texto */
-    searchClear.classList.toggle('visible', val.length > 0);
-
-    clearTimeout(searchDebounceTimer);
-    if (!val.trim()) { hideSearchResults(); return; }
-
-    searchDebounceTimer = setTimeout(() => performSearch(val), 400);
-  });
-
-  /* ════════════════════════════════════════
      TMDB API — INTEGRAÇÃO DINÂMICA
   ════════════════════════════════════════
 
@@ -2236,7 +2103,10 @@
      @returns {Promise<Array>} — array de objetos de filme
   ──────────────────────────────────────────────────────── */
   async function fetchMovies(endpoint) {
-    const url = `https://api.themoviedb.org/3${endpoint}?api_key=${TMDB_API_KEY}&language=pt-PT`;
+    /* Constrói a URL corretamente — o endpoint de pesquisa já traz '?query=...',
+       por isso usamos '&' como separador nesses casos em vez de '?' */
+    const sep = endpoint.includes('?') ? '&' : '?';
+    const url = `https://api.themoviedb.org/3${endpoint}${sep}api_key=${TMDB_API_KEY}&language=pt-PT`;
     try {
       const res = await fetch(url);
       if (!res.ok) {
@@ -2419,6 +2289,139 @@
 
   /* ── Inicia a integração TMDB quando o DOM estiver pronto ── */
   initTMDB();
+
+  /* ════════════════════════════════════════
+     PESQUISA — LÓGICA COMPLETA
+  ════════════════════════════════════════ */
+
+  const searchToggle  = document.getElementById('searchToggle');
+  const searchBox     = document.getElementById('searchBox');
+  const searchInput   = document.getElementById('searchInput');
+  const searchClear   = document.getElementById('searchClear');
+  const searchSection = document.getElementById('searchResultsSection');
+  const searchGrid    = document.getElementById('searchResultsGrid');
+  const searchLabel   = document.getElementById('searchQueryLabel');
+  const normalSections = document.querySelectorAll('.catalog-normal-section');
+
+  let searchDebounceTimer = null; /* Temporizador para debounce do input */
+  let searchIsOpen = false;
+
+  /* ── Abre a barra de pesquisa ── */
+  function openSearch() {
+    searchIsOpen = true;
+    searchBox.classList.add('open');
+    searchToggle.classList.add('hidden');
+    /* Pequeno delay para o foco funcionar depois da animação CSS */
+    setTimeout(() => searchInput.focus(), 100);
+  }
+
+  /* ── Fecha a barra e repõe o estado normal ── */
+  function closeSearch() {
+    searchIsOpen = false;
+    searchInput.value = '';
+    searchBox.classList.remove('open');
+    searchToggle.classList.remove('hidden');
+    searchClear.classList.remove('visible');
+    hideSearchResults();
+  }
+
+  /* ── Mostra a secção de resultados e escurece as categorias ── */
+  function showSearchResults() {
+    searchSection.style.display = 'block';
+    normalSections.forEach(s => s.classList.add('dimmed'));
+    /* Scroll suave até aos resultados */
+    searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ── Oculta resultados e repõe categorias ── */
+  function hideSearchResults() {
+    searchSection.style.display = 'none';
+    searchGrid.innerHTML = '';
+    normalSections.forEach(s => s.classList.remove('dimmed'));
+  }
+
+  /* ── Mostra estado de loading no grid ── */
+  function showSearchLoading(query) {
+    searchLabel.textContent = query;
+    searchGrid.innerHTML = `
+      <div class="search-state-msg">
+        <div class="search-spinner"></div>
+        A pesquisar…
+      </div>`;
+    showSearchResults();
+  }
+
+  /* ── Renderiza os resultados da pesquisa no grid ── */
+  function renderSearchResults(movies, query) {
+    searchLabel.textContent = query;
+
+    if (movies.length === 0) {
+      searchGrid.innerHTML = `
+        <div class="search-state-msg">
+          <strong>Sem resultados</strong>
+          Não encontrámos filmes para "${query}". Tenta outro título.
+        </div>`;
+      return;
+    }
+
+    /* Reutiliza buildMovieCardHTML (isFirst=false → nenhum card wide na grelha) */
+    searchGrid.innerHTML = movies
+      .map(movie => buildMovieCardHTML(movie, false))
+      .join('');
+  }
+
+  /* ── Executa a pesquisa na API do TMDB ── */
+  async function performSearch(query) {
+    const q = query.trim();
+    if (!q) { hideSearchResults(); return; }
+
+    showSearchLoading(q);
+
+    const movies = await fetchMovies(`/search/movie?query=${encodeURIComponent(q)}`);
+    renderSearchResults(movies, q);
+  }
+
+  /* ── Event Listeners ── */
+
+  /* Clique na lupa → abre a barra */
+  searchToggle.addEventListener('click', openSearch);
+
+  /* Fechar ao pressionar Escape */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && searchIsOpen) {
+      /* Se o modal estiver aberto, o Escape fecha o modal (já tratado) */
+      if (!document.getElementById('movieModal').classList.contains('is-open')) {
+        closeSearch();
+      }
+    }
+  });
+
+  /* Botão X → limpa e fecha */
+  searchClear.addEventListener('click', () => {
+    closeSearch();
+  });
+
+  /* Clique fora da barra → fecha */
+  document.addEventListener('click', e => {
+    if (searchIsOpen
+        && !e.target.closest('#navSearch')
+        && !e.target.closest('#searchResultsSection')) {
+      closeSearch();
+    }
+  });
+
+  /* Input com debounce de 400ms — evita pedidos a cada tecla */
+  searchInput.addEventListener('input', () => {
+    const val = searchInput.value;
+
+    /* Mostra/oculta o botão X conforme há texto */
+    searchClear.classList.toggle('visible', val.length > 0);
+
+    clearTimeout(searchDebounceTimer);
+    if (!val.trim()) { hideSearchResults(); return; }
+
+    searchDebounceTimer = setTimeout(() => performSearch(val), 400);
+  });
 
   /* ════════════════════════════════════════
      7. LAZY LOADING
