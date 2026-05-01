@@ -1746,11 +1746,11 @@
 </section>
 
 <!-- ══════════════════════════════════════
-     LISTAS DE FILMES
+     LISTAS DE FILMES — geradas dinamicamente pelo JS
 ══════════════════════════════════════ -->
 
-<!-- ── Populares na Clix ── -->
-<section class="catalog-section catalog-normal-section">
+<!-- row1: Populares / Trending — fixo, controlado pelo PAGES config -->
+<section class="catalog-section catalog-normal-section" id="sectionRow1">
   <div class="section-header">
     <h2 class="section-title" id="titleRow1"><span id="iconRow1">▶</span> <span id="labelRow1">Populares na Clix</span></h2>
     <a href="#" class="section-ver-mais" data-row="row1">
@@ -1762,96 +1762,24 @@
     <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
     </button>
-    <div class="row-track" id="row1">
-      <!-- Os cards são injetados dinamicamente pelo JavaScript (TMDB API) -->
-    </div>
+    <div class="row-track" id="row1"></div>
     <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
     </button>
   </div>
 </section>
 
-<!-- ── Top 10 Hoje ── -->
-<section class="catalog-section catalog-normal-section">
+<!-- Top 10 Portugal — estático, mantido -->
+<section class="catalog-section catalog-normal-section" id="sectionRow2">
   <div class="section-header">
     <h2 class="section-title"><span>10</span> Top 10 em Portugal Hoje</h2>
-    <a href="#" class="section-ver-mais" data-row="row2">
-      Ver todos
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
-    </a>
   </div>
   <div class="row-track-wrap">
     <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
     </button>
     <div class="row-track" id="row2">
-      <!-- Top 10 cards com número em destaque -->
-      <div class="top10-card">
-        <div class="top10-number">1</div>
-        <img class="top10-poster" src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&q=75" alt="Abismo" loading="lazy" />
-        <div class="top10-overlay">
-          <div class="card-title" style="font-size:11px;">Abismo</div>
-          <div class="card-actions">
-            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="top10-card">
-        <div class="top10-number">2</div>
-        <img class="top10-poster" src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=400&q=75" alt="Limiar" loading="lazy" />
-        <div class="top10-overlay">
-          <div class="card-title" style="font-size:11px;">Limiar</div>
-          <div class="card-actions">
-            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="top10-card">
-        <div class="top10-number">3</div>
-        <img class="top10-poster" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=75" alt="Vórtice" loading="lazy" />
-        <div class="top10-overlay">
-          <div class="card-title" style="font-size:11px;">Vórtice</div>
-          <div class="card-actions">
-            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="top10-card">
-        <div class="top10-number">4</div>
-        <img class="top10-poster" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=75" alt="Pico Nevado" loading="lazy" />
-        <div class="top10-overlay">
-          <div class="card-title" style="font-size:11px;">Pico Nevado</div>
-          <div class="card-actions">
-            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="top10-card">
-        <div class="top10-number">5</div>
-        <img class="top10-poster" src="https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&q=75" alt="Oceano Negro" loading="lazy" />
-        <div class="top10-overlay">
-          <div class="card-title" style="font-size:11px;">Oceano Negro</div>
-          <div class="card-actions">
-            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="top10-card">
-        <div class="top10-number">6</div>
-        <img class="top10-poster" src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=75" alt="Metrópole" loading="lazy" />
-        <div class="top10-overlay">
-          <div class="card-title" style="font-size:11px;">Metrópole</div>
-          <div class="card-actions">
-            <button class="card-btn play" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px;height:10px"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add" style="font-size:9px;padding:5px 3px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
+      <!-- Top 10 mantido estático por enquanto -->
     </div>
     <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
@@ -1859,7 +1787,7 @@
   </div>
 </section>
 
-<!-- ── Banner Promo ── -->
+<!-- Banner Promo -->
 <div class="promo-banner">
   <div class="promo-content">
     <div class="promo-label">Clix Premium</div>
@@ -1870,8 +1798,8 @@
   <div class="promo-icon">◈</div>
 </div>
 
-<!-- ── Ação e Aventura ── -->
-<section class="catalog-section catalog-normal-section">
+<!-- row3: 2.ª categoria principal — fixo, controlado pelo PAGES config -->
+<section class="catalog-section catalog-normal-section" id="sectionRow3">
   <div class="section-header">
     <h2 class="section-title" id="titleRow3"><span id="iconRow3">⚡</span> <span id="labelRow3">Ação e Aventura</span></h2>
     <a href="#" class="section-ver-mais" data-row="row3">
@@ -1883,101 +1811,18 @@
     <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
     </button>
-    <div class="row-track" id="row3">
-      <!-- Os cards são injetados dinamicamente pelo JavaScript (TMDB API) -->
-    </div>
+    <div class="row-track" id="row3"></div>
     <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
     </button>
   </div>
 </section>
 
-<!-- ── Comédia ── -->
-<section class="catalog-section catalog-normal-section">
-  <div class="section-header">
-    <h2 class="section-title"><span>😄</span> Comédia</h2>
-    <a href="#" class="section-ver-mais" data-row="row4">
-      Ver todos
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
-    </a>
-  </div>
-  <div class="row-track-wrap">
-    <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
-    </button>
-    <div class="row-track" id="row4">
-      <div class="movie-card">
-        <img class="card-poster" src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=75" alt="Férias Loucas" loading="lazy" />
-        <div class="card-overlay">
-          <div class="card-title">Férias Loucas</div>
-          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
-          <div class="card-actions">
-            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="movie-card">
-        <img class="card-poster" src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=75" alt="O Relógio Mágico" loading="lazy" />
-        <div class="card-overlay">
-          <div class="card-title">O Relógio Mágico</div>
-          <div class="card-meta"><span>2023</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
-          <div class="card-actions">
-            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="movie-card">
-        <img class="card-poster" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=75" alt="Jantar em Caos" loading="lazy" />
-        <div class="card-overlay">
-          <div class="card-title">Jantar em Caos</div>
-          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
-          <div class="card-actions">
-            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="movie-card">
-        <img class="card-poster" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=75" alt="Os Melhores Amigos" loading="lazy" />
-        <div class="card-overlay">
-          <div class="card-title">Os Melhores Amigos</div>
-          <div class="card-meta"><span>2023</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
-          <div class="card-actions">
-            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="movie-card">
-        <img class="card-poster" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=75" alt="A Receita Secreta" loading="lazy" />
-        <div class="card-overlay">
-          <div class="card-title">A Receita Secreta</div>
-          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
-          <div class="card-actions">
-            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-      <div class="movie-card">
-        <img class="card-poster" src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=400&q=75" alt="Palco Louco" loading="lazy" />
-        <div class="card-overlay">
-          <div class="card-title">Palco Louco</div>
-          <div class="card-meta"><span>2024</span><span class="card-meta-dot">·</span><span>Comédia</span></div>
-          <div class="card-actions">
-            <button class="card-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Play</button>
-            <button class="card-btn add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lista</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
-    </button>
-  </div>
-</section>
+<!-- ══════════════════════════════════════
+     CATÁLOGO DE GÉNEROS — injetado dinamicamente pelo JS
+     (buildGenreRows insere <section> aqui)
+══════════════════════════════════════ -->
+<div id="genre-catalog"></div>
 
 <!-- ══════════════════════════════════════
      FOOTER
@@ -3427,7 +3272,8 @@
   }
 
   /* ── initTMDB ─────────────────────────────────────────────
-     Ponto de entrada: valida a key e carrega a página inicial.
+     Ponto de entrada: valida a key, carrega a página inicial
+     e constrói os carrosséis de género dinamicamente.
   ──────────────────────────────────────────────────────── */
   async function initTMDB() {
     if (!TMDB_API_KEY || TMDB_API_KEY === 'COLA_AQUI_A_TUA_API_KEY') {
@@ -3436,6 +3282,309 @@
     }
     loadPage('home');
   }
+
+  /* ════════════════════════════════════════
+     GRELHA EXPANSIVA — estado e helpers
+  ════════════════════════════════════════ */
+
+  /* Estado por row em modo grelha:
+       originalHTML — snapshot dos cards da pág. 1 para restaurar
+       gridPage     — próxima página a pedir no observer vertical
+       gridLoading  — lock anti-duplos
+       gridObserver — IntersectionObserver activo
+  */
+  const gridState = new Map();
+
+  /* ── fetchPage ────────────────────────────────────────────
+     Pede UMA página específica de um endpoint TMDB.
+  ──────────────────────────────────────────────────────── */
+  async function fetchPage(endpoint, page) {
+    const sep = endpoint.includes('?') ? '&' : '?';
+    const url = `https://api.themoviedb.org/3${endpoint}${sep}` +
+                `api_key=${TMDB_API_KEY}&language=pt-PT&page=${page}`;
+    try {
+      const res  = await fetch(url);
+      const data = await res.json();
+      return data.results || [];
+    } catch {
+      return [];
+    }
+  }
+
+  /* ── appendGridMovies ─────────────────────────────────────
+     Converte filmes em cards e faz appendChild com fade-in.
+  ──────────────────────────────────────────────────────── */
+  function appendGridMovies(track, movies) {
+    if (!movies.length) return;
+    const frag = document.createDocumentFragment();
+    movies.forEach((movie, i) => {
+      const tmp  = document.createElement('div');
+      tmp.innerHTML = buildMovieCardHTML(movie, false);
+      const card = tmp.firstElementChild;
+      card.classList.add('revealed');
+      card.style.animationDelay = `${Math.min(i, 8) * 0.03}s`;
+      frag.appendChild(card);
+    });
+    track.appendChild(frag);
+  }
+
+  /* ── attachGridObserver ───────────────────────────────────
+     Scroll infinito VERTICAL dentro da grelha.
+     Coloca um sentinel no fim da secção; quando entra no
+     viewport, carrega a próxima página e relança o observer.
+  ──────────────────────────────────────────────────────── */
+  function attachGridObserver(rowId, section) {
+    const gs = gridState.get(rowId);
+    if (!gs) return;
+
+    gs.gridObserver?.disconnect();
+
+    let sentinel = section.querySelector('.grid-sentinel');
+    if (!sentinel) {
+      sentinel = document.createElement('div');
+      sentinel.className = 'grid-sentinel';
+      sentinel.style.cssText = 'height:1px;width:100%;margin-top:40px;';
+      section.appendChild(sentinel);
+    }
+
+    const obs = new IntersectionObserver(async entries => {
+      if (!entries[0].isIntersecting || gs.gridLoading) return;
+      const state = rowState.get(rowId);
+      if (!state || gs.gridPage > state.totalPages) { obs.disconnect(); return; }
+
+      gs.gridLoading = true;
+      obs.unobserve(sentinel);
+
+      const track = document.getElementById(rowId);
+      const skels = appendSkeletons(track, 6);
+      const movies = await fetchPage(state.endpoint, gs.gridPage);
+      skels.forEach(s => s.remove());
+
+      if (movies.length) {
+        appendGridMovies(track, movies);
+        gs.gridPage++;
+        if (gs.gridPage <= state.totalPages) obs.observe(sentinel);
+        else sentinel.remove();
+      }
+      gs.gridLoading = false;
+    }, { rootMargin: '300px', threshold: 0 });
+
+    obs.observe(sentinel);
+    gs.gridObserver = obs;
+  }
+
+  /* ════════════════════════════════════════
+     CATÁLOGO DE GÉNEROS — gerado dinamicamente
+  ════════════════════════════════════════
+
+  Mapa de emoji por genre_id TMDB.
+  Géneros sem emoji definido ficam com 🎬 por omissão.
+  ════════════════════════════════════════ */
+  const GENRE_EMOJI = {
+    28   : '⚡',  /* Ação */
+    12   : '🗺️',  /* Aventura */
+    16   : '✨',  /* Animação */
+    35   : '😂',  /* Comédia */
+    80   : '🔫',  /* Crime */
+    99   : '🎙️',  /* Documentário */
+    18   : '🎭',  /* Drama */
+    10751: '👨‍👩‍👧',  /* Família */
+    14   : '🐉',  /* Fantasia */
+    36   : '📜',  /* História */
+    27   : '👻',  /* Terror */
+    10402: '🎵',  /* Música */
+    9648 : '🔍',  /* Mistério */
+    10749: '💕',  /* Romance */
+    878  : '🚀',  /* Ficção Científica */
+    10770: '📺',  /* Televisão */
+    53   : '😰',  /* Suspense */
+    10752: '⚔️',  /* Guerra */
+    37   : '🤠',  /* Western */
+  };
+
+  /* SVG das setas (reutilizável no template) */
+  const ARROW_LEFT  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>`;
+  const ARROW_RIGHT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>`;
+  const ARROW_CHEVRON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>`;
+
+  /* ── buildSectionHTML ─────────────────────────────────────
+     Gera o HTML completo de uma secção de carrossel.
+     @param {string} rowId   — id único para o .row-track
+     @param {string} emoji   — emoji do género
+     @param {string} label   — nome do género em português
+     @returns {string} HTML da <section>
+  ──────────────────────────────────────────────────────── */
+  function buildSectionHTML(rowId, emoji, label) {
+    return `
+<section class="catalog-section catalog-normal-section genre-section" id="section-${rowId}">
+  <div class="section-header">
+    <h2 class="section-title"><span>${emoji}</span> ${label}</h2>
+    <a href="#" class="section-ver-mais" data-row="${rowId}">
+      Ver todos
+      ${ARROW_CHEVRON}
+    </a>
+  </div>
+  <div class="row-track-wrap">
+    <button class="row-arrow left" onclick="scrollRow(this,-1)" aria-label="Anterior">${ARROW_LEFT}</button>
+    <div class="row-track" id="${rowId}"></div>
+    <button class="row-arrow right" onclick="scrollRow(this,1)" aria-label="Seguinte">${ARROW_RIGHT}</button>
+  </div>
+</section>`;
+  }
+
+  /* ── buildGenreRows ───────────────────────────────────────
+     Função principal do catálogo de géneros:
+     1. Vai buscar a lista oficial de géneros ao TMDB
+     2. Para cada género, cria a secção no DOM
+     3. Dispara o fetch de filmes para cada género
+        de forma escalonada (não todos ao mesmo tempo)
+     @param {string} mediaType — 'movie' ou 'tv'
+  ──────────────────────────────────────────────────────── */
+  async function buildGenreRows(mediaType = 'movie') {
+    const catalog = document.getElementById('genre-catalog');
+    if (!catalog) return;
+
+    /* Limpa conteúdo anterior (ao trocar de modo) */
+    catalog.innerHTML = '';
+
+    /* Busca a lista de géneros */
+    const type  = mediaType === 'tv' ? 'tv' : 'movie';
+    const sep   = '?';
+    const url   = `https://api.themoviedb.org/3/genre/${type}/list${sep}api_key=${TMDB_API_KEY}&language=pt-PT`;
+    let genres  = [];
+    try {
+      const res  = await fetch(url);
+      const data = await res.json();
+      genres     = data.genres || [];
+    } catch (err) {
+      console.warn('[TMDB] Não foi possível carregar os géneros:', err);
+      return;
+    }
+
+    if (!genres.length) return;
+
+    /* Géneros a excluir do catálogo de início
+       (já estão cobertos por row1/row3 ou são demasiado genéricos) */
+    const SKIP_IDS = new Set([28, 12]); /* Ação e Aventura já em row3 */
+
+    /* Cria as secções no DOM e mostra skeletons imediatamente */
+    const toLoad = []; /* lista de {rowId, endpoint} para carregar depois */
+
+    genres.forEach((genre, idx) => {
+      if (SKIP_IDS.has(genre.id)) return;
+
+      const rowId    = `genre-${genre.id}`;
+      const emoji    = GENRE_EMOJI[genre.id] || '🎬';
+      const label    = genre.name;
+      const endpoint = `/discover/${type}?with_genres=${genre.id}&sort_by=popularity.desc`;
+
+      /* Insere a secção no DOM */
+      catalog.insertAdjacentHTML('beforeend', buildSectionHTML(rowId, emoji, label));
+
+      /* Skeletons imediatos — o utilizador vê feedback visual antes do fetch */
+      showSkeletons(rowId, 6);
+
+      toLoad.push({ rowId, endpoint, idx });
+    });
+
+    /* Adiciona listener "Ver todos" às novas secções criadas */
+    bindVerTodosListeners(catalog);
+
+    /* Carrega os filmes de cada género de forma escalonada:
+       grupos de 4 em paralelo, com 200ms entre grupos.
+       Evita 20 fetches simultâneos que poderiam ser throttled. */
+    const BATCH = 4;
+    for (let i = 0; i < toLoad.length; i += BATCH) {
+      const batch = toLoad.slice(i, i + BATCH);
+      await Promise.all(batch.map(async ({ rowId, endpoint }) => {
+        const movies = await fetchMovies(endpoint);
+        renderRow(rowId, movies.slice(0, 12), endpoint);
+      }));
+      /* Pequena pausa entre batches para não sobrecarregar a API */
+      if (i + BATCH < toLoad.length) {
+        await new Promise(r => setTimeout(r, 200));
+      }
+    }
+  }
+
+  /* ── bindVerTodosListeners ────────────────────────────────
+     Adiciona os event listeners "Ver todos" a um contentor.
+     Separado da função principal para poder ser chamado
+     tanto no setup inicial como após gerar novas secções.
+  ──────────────────────────────────────────────────────── */
+  function bindVerTodosListeners(container = document) {
+    container.querySelectorAll('.section-ver-mais[data-row]').forEach(btn => {
+      /* Evita adicionar o listener duas vezes */
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = '1';
+
+      btn.addEventListener('click', async e => {
+        e.preventDefault();
+
+        const rowId   = btn.dataset.row;
+        const track   = document.getElementById(rowId);
+        const wrap    = track?.closest('.row-track-wrap');
+        const section = wrap?.closest('.catalog-section');
+        if (!wrap || !track || !section) return;
+
+        const isExpanded = wrap.classList.toggle('grid-view');
+        btn.classList.toggle('expanded', isExpanded);
+
+        const textNode = [...btn.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+        if (textNode) textNode.textContent = isExpanded
+          ? '\n      Recolher\n      '
+          : '\n      Ver todos\n      ';
+
+        if (isExpanded) {
+          gridState.set(rowId, {
+            originalHTML : track.innerHTML,
+            gridPage     : 5,
+            gridLoading  : false,
+            gridObserver : null,
+          });
+
+          track.scrollLeft = 0;
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          const state = rowState.get(rowId);
+          if (state?.endpoint) {
+            const skels = appendSkeletons(track, 8);
+            const [p2, p3, p4] = await Promise.all([
+              fetchPage(state.endpoint, 2),
+              fetchPage(state.endpoint, 3),
+              fetchPage(state.endpoint, 4),
+            ]);
+            skels.forEach(s => s.remove());
+            appendGridMovies(track, [...p2, ...p3, ...p4]);
+            state.page = Math.max(state.page, 5);
+          }
+
+          const gs = gridState.get(rowId);
+          if (gs) attachGridObserver(rowId, section);
+
+        } else {
+          const gs = gridState.get(rowId);
+          if (gs) {
+            gs.gridObserver?.disconnect();
+            section.querySelector('.grid-sentinel')?.remove();
+            track.innerHTML = gs.originalHTML;
+            gridState.delete(rowId);
+          }
+        }
+      });
+    });
+  }
+
+  /* Actualiza loadPage para reconstruir os géneros ao trocar de modo */
+  const _originalLoadPage = loadPage;
+  loadPage = async function(page) {
+    /* Limpa o catálogo de géneros antes de recarregar */
+    document.getElementById('genre-catalog').innerHTML = '';
+    await _originalLoadPage(page);
+    /* Reconstrói os géneros para o novo tipo de media */
+    const mediaType = PAGES[page]?.mediaType || 'movie';
+    await buildGenreRows(mediaType);
+  };
 
   /* ── Listeners dos links da navbar ── */
   document.querySelectorAll('.nav-links a[data-page]').forEach(link => {
@@ -3613,203 +3762,8 @@
   });
 
 
-  /* ════════════════════════════════════════
-     "VER TODOS" — ALTERNÂNCIA CARROSSEL ↔ GRELHA EXPANSIVA
-  ════════════════════════════════════════
-
-  Funcionamento:
-  • Ao expandir: burst fetch das págs. 2-4 em paralelo (≈60 filmes extra)
-    + IntersectionObserver vertical para scroll infinito na grelha
-  • Ao recolher: restaura exatamente os cards originais (snapshot do DOM)
-    e desliga o observer vertical
-  ════════════════════════════════════════ */
-
-  /* Mapa de estado por row para o modo grelha */
-  const gridState = new Map();
-  /*  gridState.get('row1') → {
-        originalHTML : string   — snapshot dos cards da pág. 1
-        gridPage     : number   — próxima pág. a pedir na grelha
-        gridLoading  : boolean  — lock
-        gridObserver : IO|null  — observer vertical
-      }
-  */
-
-  /* ── fetchPage ────────────────────────────────────────────
-     Pede UMA página específica de um endpoint e devolve os filmes.
-  ──────────────────────────────────────────────────────── */
-  async function fetchPage(endpoint, page) {
-    const sep = endpoint.includes('?') ? '&' : '?';
-    const url = `https://api.themoviedb.org/3${endpoint}${sep}` +
-                `api_key=${TMDB_API_KEY}&language=pt-PT&page=${page}`;
-    try {
-      const res  = await fetch(url);
-      const data = await res.json();
-      return data.results || [];
-    } catch {
-      return [];
-    }
-  }
-
-  /* ── appendGridMovies ─────────────────────────────────────
-     Converte um array de filmes em cards e faz appendChild
-     no track, com fade-in escalonado.
-  ──────────────────────────────────────────────────────── */
-  function appendGridMovies(track, movies) {
-    if (!movies.length) return;
-    const frag = document.createDocumentFragment();
-    movies.forEach((movie, i) => {
-      const tmp  = document.createElement('div');
-      tmp.innerHTML = buildMovieCardHTML(movie, false);
-      const card = tmp.firstElementChild;
-      card.classList.add('revealed');
-      card.style.animationDelay = `${Math.min(i, 8) * 0.03}s`;
-      frag.appendChild(card);
-    });
-    track.appendChild(frag);
-  }
-
-  /* ── attachGridObserver ───────────────────────────────────
-     Liga um IntersectionObserver a um sentinel <div> no fim
-     da secção, para scroll infinito VERTICAL dentro da grelha.
-     Quando o sentinel entra no viewport da página, carrega
-     a próxima página e move o sentinel para o novo fim.
-  ──────────────────────────────────────────────────────── */
-  function attachGridObserver(rowId, section) {
-    const gs = gridState.get(rowId);
-    if (!gs) return;
-
-    /* Desliga observer anterior */
-    gs.gridObserver?.disconnect();
-
-    /* Cria elemento sentinel invisível no fim da secção */
-    let sentinel = section.querySelector('.grid-sentinel');
-    if (!sentinel) {
-      sentinel = document.createElement('div');
-      sentinel.className = 'grid-sentinel';
-      sentinel.style.cssText = 'height:1px;width:100%;margin-top:40px;';
-      section.appendChild(sentinel);
-    }
-
-    const obs = new IntersectionObserver(async entries => {
-      if (!entries[0].isIntersecting) return;
-      if (gs.gridLoading) return;
-
-      const state = rowState.get(rowId);
-      if (!state) return;
-      /* Usa as páginas a partir de onde o rowState ficou */
-      if (gs.gridPage > state.totalPages) {
-        obs.disconnect();
-        return;
-      }
-
-      gs.gridLoading = true;
-      obs.unobserve(sentinel);
-
-      const track = document.getElementById(rowId);
-
-      /* Skeletons temporários no fim da grelha */
-      const skels = appendSkeletons(track, 6);
-
-      const movies = await fetchPage(state.endpoint, gs.gridPage);
-      skels.forEach(s => s.remove());
-
-      if (movies.length) {
-        appendGridMovies(track, movies);
-        gs.gridPage++;
-        /* Reanexta o observer para a próxima página */
-        if (gs.gridPage <= state.totalPages) {
-          obs.observe(sentinel);
-        } else {
-          sentinel.remove();
-        }
-      }
-
-      gs.gridLoading = false;
-    }, {
-      rootMargin: '300px', /* dispara 300px antes do fim do ecrã */
-      threshold : 0,
-    });
-
-    obs.observe(sentinel);
-    gs.gridObserver = obs;
-  }
-
-  /* ── Listeners dos botões "Ver todos" ── */
-  document.querySelectorAll('.section-ver-mais[data-row]').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.preventDefault();
-
-      const rowId   = btn.dataset.row;
-      const track   = document.getElementById(rowId);
-      const wrap    = track?.closest('.row-track-wrap');
-      const section = wrap?.closest('.catalog-section');
-      if (!wrap || !track || !section) return;
-
-      const isExpanded = wrap.classList.toggle('grid-view');
-
-      /* Atualiza texto e estilo do botão */
-      btn.classList.toggle('expanded', isExpanded);
-      const textNode = [...btn.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
-      if (textNode) textNode.textContent = isExpanded
-        ? '\n      Recolher\n      '
-        : '\n      Ver todos\n      ';
-
-      if (isExpanded) {
-        /* ── EXPANDIR ── */
-
-        /* 1. Guarda snapshot dos cards originais (pág. 1) */
-        gridState.set(rowId, {
-          originalHTML : track.innerHTML,
-          gridPage     : 5,    /* burst faz págs. 2-4; observer começa na 5 */
-          gridLoading  : false,
-          gridObserver : null,
-        });
-
-        track.scrollLeft = 0;
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        /* 2. Burst: pede as págs. 2, 3 e 4 em paralelo */
-        const state = rowState.get(rowId);
-        if (state?.endpoint) {
-          /* Mostra 8 skeletons enquanto as 3 páginas carregam */
-          const skels = appendSkeletons(track, 8);
-
-          const [p2, p3, p4] = await Promise.all([
-            fetchPage(state.endpoint, 2),
-            fetchPage(state.endpoint, 3),
-            fetchPage(state.endpoint, 4),
-          ]);
-
-          skels.forEach(s => s.remove());
-          appendGridMovies(track, [...p2, ...p3, ...p4]);
-
-          /* Actualiza o rowState para não duplicar páginas no scroll horizontal */
-          state.page = Math.max(state.page, 5);
-        }
-
-        /* 3. Scroll infinito vertical na grelha */
-        const gs = gridState.get(rowId);
-        if (gs) attachGridObserver(rowId, section);
-
-      } else {
-        /* ── RECOLHER ── */
-
-        const gs = gridState.get(rowId);
-        if (gs) {
-          /* Desliga observer vertical */
-          gs.gridObserver?.disconnect();
-
-          /* Remove sentinel se existir */
-          section.querySelector('.grid-sentinel')?.remove();
-
-          /* Restaura os cards originais (pág. 1 apenas) */
-          track.innerHTML = gs.originalHTML;
-
-          gridState.delete(rowId);
-        }
-      }
-    });
-  });
+  /* Bind "Ver todos" nos botões estáticos (row1, row3) que existem no HTML de arranque */
+  bindVerTodosListeners(document);
 
   /* ════════════════════════════════════════
      7. LAZY LOADING
