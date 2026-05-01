@@ -1297,6 +1297,23 @@
   .search-results-grid .movie-card:nth-child(8)  { animation-delay: 0.16s; }
   .search-results-grid .movie-card:nth-child(n+9) { animation-delay: 0.18s; }
 
+  /* Skeleton de loading para os cards de sugestão */
+  .modal-more-skeleton {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(90deg, var(--card-bg) 25%, var(--surface2) 50%, var(--card-bg) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    aspect-ratio: 2/3;
+    width: 100%;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Cursor pointer nos cards de sugestão */
+  .modal-more-card { cursor: pointer; }
+
   /* Efeito de transição nas categorias normais ao entrar em modo pesquisa */
   .catalog-normal-section {
     transition: opacity 0.25s ease;
@@ -1910,23 +1927,20 @@
     }
   };
 
-  /* Dados genéricos quando o card não tem entrada na DB */
-  function buildGenericMovie(title, thumb, year, genre) {
+  /* Dados genéricos quando o card não tem entrada na DB.
+     Se tmdbId for passado, o modal vai buscar dados dinâmicos à API. */
+  function buildGenericMovie(title, thumb, year, genre, tmdbId) {
     return {
-      title, thumb,
+      title, thumb, tmdbId: tmdbId || null,
       year    : year  || '2024',
       rating  : 'M/12',
       duration: '1h 48min',
       synopsis: 'Uma história envolvente que prende o espectador do início ao fim, com personagens complexas e uma narrativa repleta de reviravoltas inesperadas.',
       genres  : genre ? [genre] : ['Drama'],
-      cast    : 'A definir',
-      director: 'A definir',
+      cast    : null,
+      director: null,
       studio  : 'Clix Originals',
-      similar : [
-        { title:'Sombras do Passado', year:'2023', genre:'Drama',   thumb:'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=600&q=70' },
-        { title:'Fúria Urbana',       year:'2024', genre:'Ação',    thumb:'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=600&q=70' },
-        { title:'Maré Alta',          year:'2024', genre:'Suspense',thumb:'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&q=70' },
-      ]
+      similar : []
     };
   }
 
@@ -1938,17 +1952,18 @@
   const modalAddBtn = document.getElementById('modalAddBtn');
   let   addedSet    = new Set(); // guarda títulos já adicionados à lista
 
-  /* Preenche o modal com os dados do filme */
+  /* ── Indicador de loading para elenco/realizador/sugestões ── */
+  const LOADING_PLACEHOLDER = '<span style="opacity:.45;font-style:italic;">A carregar…</span>';
+
+  /* Preenche o modal com os dados base do filme */
   function populateModal(data) {
-    document.getElementById('modalThumb').src       = data.thumb;
-    document.getElementById('modalTitle').textContent= data.title;
-    document.getElementById('modalYear').textContent = data.year;
+    document.getElementById('modalThumb').src        = data.thumb;
+    document.getElementById('modalTitle').textContent = data.title;
+    document.getElementById('modalYear').textContent  = data.year;
     document.getElementById('modalRating').textContent= data.rating;
     document.getElementById('modalDuration').textContent = data.duration;
     document.getElementById('modalSynopsis').textContent = data.synopsis;
-    document.getElementById('modalCast').textContent     = data.cast;
     document.getElementById('modalGenres').textContent   = data.genres.join(', ');
-    document.getElementById('modalDirector').textContent = data.director;
     document.getElementById('modalStudio').textContent   = data.studio;
 
     /* Pills de género */
@@ -1960,11 +1975,30 @@
     modalAddBtn.classList.toggle('added', addedSet.has(data.title));
     modalAddBtn.dataset.movieTitle = data.title;
 
-    /* Sugestões relacionadas */
+    /* Elenco e realizador: se vier da TMDB ficam como "A carregar…",
+       senão usa o que estava definido (ex: hero estático) */
+    document.getElementById('modalCast').innerHTML     = data.cast     || LOADING_PLACEHOLDER;
+    document.getElementById('modalDirector').innerHTML = data.director || LOADING_PLACEHOLDER;
+
+    /* Sugestões: se existirem dados estáticos usa-os; caso contrário
+       mostra esqueleto de loading */
     const grid = document.getElementById('modalMoreGrid');
-    grid.innerHTML = data.similar.map(s => `
-      <div class="modal-more-card">
-        <img src="${s.thumb}" alt="${s.title}" loading="lazy" />
+    if (data.similar && data.similar.length > 0) {
+      renderSimilarCards(grid, data.similar);
+    } else {
+      grid.innerHTML = `
+        <div class="modal-more-skeleton"></div>
+        <div class="modal-more-skeleton"></div>
+        <div class="modal-more-skeleton"></div>`;
+    }
+  }
+
+  /* Renderiza os cards de "Também podes gostar" */
+  function renderSimilarCards(grid, movies) {
+    grid.innerHTML = movies.map(s => `
+      <div class="modal-more-card" data-movie-id="${s.id || ''}" style="cursor:pointer;">
+        <img src="${s.thumb}" alt="${s.title}" loading="lazy"
+             onerror="this.src='${typeof TMDB_PLACEHOLDER !== 'undefined' ? TMDB_PLACEHOLDER : ''}'" />
         <div class="modal-more-card-info">
           <div class="modal-more-card-title">${s.title}</div>
           <div class="modal-more-card-meta">${s.year} · ${s.genre}</div>
@@ -1972,15 +2006,70 @@
       </div>`).join('');
   }
 
-  /* Abre o modal */
+  /* ── Abre o modal com dados base e dispara pedidos async à TMDB ── */
   function openModal(movieData) {
     populateModal(movieData);
     modalEl.classList.add('is-open');
-    document.body.style.overflow = 'hidden'; /* bloqueia scroll da página */
-    /* Foco no botão fechar para acessibilidade */
+    document.body.style.overflow = 'hidden';
     setTimeout(() => modalClose.focus(), 50);
-    /* Reset scroll interno do modal */
     modalEl.scrollTop = 0;
+
+    /* Se o filme tiver um ID real do TMDB, vai buscar dados dinâmicos */
+    if (movieData.tmdbId) {
+      loadModalDynamicData(movieData.tmdbId);
+    }
+  }
+
+  /* ── Carrega créditos e filmes similares via TMDB ── */
+  async function loadModalDynamicData(movieId) {
+    /* Pedidos em paralelo: créditos + recomendações */
+    const [credits, similar] = await Promise.all([
+      fetchTMDBRaw(`/movie/${movieId}/credits`),
+      fetchTMDBRaw(`/movie/${movieId}/recommendations`)
+    ]);
+
+    /* ── Elenco: 3 atores principais ── */
+    if (credits && credits.cast) {
+      const topCast = credits.cast
+        .slice(0, 3)
+        .map(a => a.name)
+        .join(', ');
+      document.getElementById('modalCast').textContent = topCast || 'Não disponível';
+    }
+
+    /* ── Realizador ── */
+    if (credits && credits.crew) {
+      const director = credits.crew.find(p => p.job === 'Director');
+      document.getElementById('modalDirector').textContent =
+        director ? director.name : 'Não disponível';
+    }
+
+    /* ── Filmes similares/recomendados: 3 primeiros com poster ── */
+    const grid = document.getElementById('modalMoreGrid');
+    if (similar && similar.results && similar.results.length > 0) {
+      const picks = similar.results
+        .filter(m => m.poster_path) /* só filmes com poster */
+        .slice(0, 3)
+        .map(m => ({
+          id   : m.id,
+          title: m.title || m.name || 'Sem título',
+          year : (m.release_date || m.first_air_date || '').slice(0, 4) || '—',
+          genre: getGenreName(m.genre_ids),
+          thumb: `${TMDB_IMG_BASE}${m.poster_path}`
+        }));
+      if (picks.length > 0) renderSimilarCards(grid, picks);
+    }
+  }
+
+  /* Versão de fetch que retorna o JSON completo (não só .results) */
+  async function fetchTMDBRaw(endpoint) {
+    const sep = endpoint.includes('?') ? '&' : '?';
+    const url = `https://api.themoviedb.org/3${endpoint}${sep}api_key=${TMDB_API_KEY}&language=pt-PT`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch { return null; }
   }
 
   /* Fecha o modal */
@@ -2035,7 +2124,8 @@
       const thumb  = card.querySelector('img')?.src || '';
       const year   = card.querySelector('.card-meta span')?.textContent || '2024';
       const genre  = card.querySelectorAll('.card-meta span')[2]?.textContent || '';
-      openModal(buildGenericMovie(title, thumb, year, genre));
+      const tmdbId = card.dataset.tmdbId ? Number(card.dataset.tmdbId) : null;
+      openModal(buildGenericMovie(title, thumb, year, genre, tmdbId));
       return;
     }
 
@@ -2045,11 +2135,12 @@
       e.stopPropagation();
       const parentCard = playBtn.closest('.movie-card, .top10-card');
       if (parentCard) {
-        const title = parentCard.querySelector('.card-title')?.textContent?.trim() || 'Sem título';
-        const thumb = parentCard.querySelector('img')?.src || '';
-        const year  = parentCard.querySelector('.card-meta span')?.textContent || '2024';
-        const genre = parentCard.querySelectorAll('.card-meta span')[2]?.textContent || '';
-        openModal(buildGenericMovie(title, thumb, year, genre));
+        const title  = parentCard.querySelector('.card-title')?.textContent?.trim() || 'Sem título';
+        const thumb  = parentCard.querySelector('img')?.src || '';
+        const year   = parentCard.querySelector('.card-meta span')?.textContent || '2024';
+        const genre  = parentCard.querySelectorAll('.card-meta span')[2]?.textContent || '';
+        const tmdbId = parentCard.dataset.tmdbId ? Number(parentCard.dataset.tmdbId) : null;
+        openModal(buildGenericMovie(title, thumb, year, genre, tmdbId));
       }
       return;
     }
@@ -2057,11 +2148,14 @@
     /* Clique nos cards de sugestão dentro do modal */
     const moreCard = e.target.closest('.modal-more-card');
     if (moreCard) {
-      const title = moreCard.querySelector('.modal-more-card-title')?.textContent || 'Sem título';
-      const thumb = moreCard.querySelector('img')?.src || '';
-      const meta  = moreCard.querySelector('.modal-more-card-meta')?.textContent || '';
+      const title  = moreCard.querySelector('.modal-more-card-title')?.textContent || 'Sem título';
+      const thumb  = moreCard.querySelector('img')?.src || '';
+      const meta   = moreCard.querySelector('.modal-more-card-meta')?.textContent || '';
       const [year, genre] = meta.split('·').map(s => s.trim());
-      openModal(buildGenericMovie(title, thumb, year, genre));
+      const tmdbId = moreCard.dataset.movieId ? Number(moreCard.dataset.movieId) : null;
+      /* Scroll do modal ao topo antes de mudar o conteúdo */
+      modalEl.scrollTop = 0;
+      openModal(buildGenericMovie(title, thumb, year, genre, tmdbId));
       return;
     }
   });
@@ -2152,7 +2246,7 @@
     const svgAdd  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 
     return `
-      <div class="movie-card${wideClass}">
+      <div class="movie-card${wideClass}" data-tmdb-id="${movie.id || ''}">
         <img class="card-poster" src="${poster}" alt="${title}" loading="lazy"
              onerror="this.src='${TMDB_PLACEHOLDER}'" />
         <div class="card-overlay">
@@ -2248,7 +2342,7 @@
         ? `${TMDB_IMG_BASE}${movie.poster_path}`
         : TMDB_PLACEHOLDER;
       const genre  = getGenreName(movie.genre_ids);
-      const heroMovieData = buildGenericMovie(title, poster, year || '—', genre);
+      const heroMovieData = buildGenericMovie(title, poster, year || '—', genre, movie.id);
       /* Substitui a sinopse genérica pela real da API */
       heroMovieData.synopsis = movie.overview || heroMovieData.synopsis;
 
