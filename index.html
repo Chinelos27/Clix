@@ -927,13 +927,74 @@
     overflow: hidden;
     background: #000;
   }
+
+  /* Imagem de fallback (backdrop) */
   .modal-trailer-img {
     width: 100%; height: 100%;
     object-fit: cover;
     object-position: center 25%;
     display: block;
-    transition: transform 0.5s ease;
+    transition: transform 0.5s ease, opacity 0.4s ease;
   }
+
+  /* iframe do YouTube — ocupa toda a área do modal-hero */
+  .modal-trailer-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    border: none;
+    /* O iframe YT tem aspect-ratio 16/9; como o modal-hero é 16/7,
+       fazemos scale para cobrir totalmente sem barras pretas */
+    transform: scale(1.35);
+    pointer-events: none; /* evita que o utilizador interaja e pause */
+  }
+
+  /* Badge "SEM SOM" exibido sobre o trailer (mute=1) */
+  .modal-mute-badge {
+    position: absolute;
+    top: 12px; left: 14px;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(8,8,16,0.68);
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    color: rgba(240,238,248,0.75);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 4px 10px 4px 8px;
+    border-radius: 20px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s 0.8s; /* aparece ligeiramente depois do iframe */
+  }
+  .modal-mute-badge.visible { opacity: 1; }
+  .modal-mute-badge svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* Spinner de loading enquanto o iframe ainda não arrancou */
+  .modal-trailer-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8,8,16,0.5);
+    z-index: 12;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .modal-trailer-loading.hidden { opacity: 0; }
+  .modal-trailer-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(255,255,255,0.15);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .modal-hero-vignette {
     position: absolute; inset: 0;
     background: linear-gradient(
@@ -1782,10 +1843,31 @@
 <div id="movieModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-container">
 
-    <!-- Cabeçalho: imagem/trailer -->
-    <div class="modal-hero">
+    <!-- Cabeçalho: trailer (iframe) ou backdrop (fallback) -->
+    <div class="modal-hero" id="modalHero">
+
+      <!-- Imagem de fallback / backdrop (visível até o trailer carregar) -->
       <img id="modalThumb" class="modal-trailer-img" src="" alt="Capa do filme" />
+
+      <!-- O iframe do YouTube é injetado aqui dinamicamente pelo JS -->
+
+      <!-- Vinheta sobre o vídeo/imagem -->
       <div class="modal-hero-vignette"></div>
+
+      <!-- Spinner de loading (mostrado enquanto o iframe não arrancou) -->
+      <div class="modal-trailer-loading hidden" id="modalTrailerLoading">
+        <div class="modal-trailer-spinner"></div>
+      </div>
+
+      <!-- Badge "SEM SOM" (aparece quando há trailer) -->
+      <div class="modal-mute-badge" id="modalMuteBadge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+        SEM SOM
+      </div>
 
       <!-- Botão fechar -->
       <button class="modal-close-btn" id="modalCloseBtn" aria-label="Fechar">
@@ -1794,8 +1876,8 @@
         </svg>
       </button>
 
-      <!-- Botão Play central (simulação de trailer) -->
-      <button class="modal-play-overlay" aria-label="Reproduzir trailer">
+      <!-- Botão Play central — visível apenas no modo fallback (sem trailer) -->
+      <button class="modal-play-overlay" id="modalPlayOverlay" aria-label="Reproduzir trailer">
         <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
       </button>
 
@@ -1929,9 +2011,10 @@
 
   /* Dados genéricos quando o card não tem entrada na DB.
      Se tmdbId for passado, o modal vai buscar dados dinâmicos à API. */
-  function buildGenericMovie(title, thumb, year, genre, tmdbId) {
+  function buildGenericMovie(title, thumb, year, genre, tmdbId, backdropUrl) {
     return {
       title, thumb, tmdbId: tmdbId || null,
+      backdropUrl: backdropUrl || thumb || null,
       year    : year  || '2024',
       rating  : 'M/12',
       duration: '1h 48min',
@@ -1957,7 +2040,22 @@
 
   /* Preenche o modal com os dados base do filme */
   function populateModal(data) {
-    document.getElementById('modalThumb').src        = data.thumb;
+    /* ── Reset visual do hero: remove iframe anterior e repõe imagem ── */
+    stopTrailer();
+
+    /* Backdrop: usa backdrop_path se disponível, senão poster */
+    const backdropUrl = data.backdropUrl || data.thumb || '';
+    const thumbEl = document.getElementById('modalThumb');
+    thumbEl.src = backdropUrl;
+    thumbEl.style.opacity = '1';
+
+    /* Se há tmdbId, mostra spinner enquanto o trailer não chegou */
+    const loadingEl = document.getElementById('modalTrailerLoading');
+    if (data.tmdbId) {
+      loadingEl.classList.remove('hidden');
+    } else {
+      loadingEl.classList.add('hidden');
+    }
     document.getElementById('modalTitle').textContent = data.title;
     document.getElementById('modalYear').textContent  = data.year;
     document.getElementById('modalRating').textContent= data.rating;
@@ -2020,13 +2118,26 @@
     }
   }
 
-  /* ── Carrega créditos e filmes similares via TMDB ── */
+  /* ── Carrega trailer, créditos e filmes similares via TMDB ── */
   async function loadModalDynamicData(movieId) {
-    /* Pedidos em paralelo: créditos + recomendações */
-    const [credits, similar] = await Promise.all([
+    /* Três pedidos em paralelo: vídeos + créditos + recomendações */
+    const [videos, credits, similar] = await Promise.all([
+      fetchTMDBRaw(`/movie/${movieId}/videos`),
       fetchTMDBRaw(`/movie/${movieId}/credits`),
       fetchTMDBRaw(`/movie/${movieId}/recommendations`)
     ]);
+
+    /* ── Trailer do YouTube ── */
+    let trailerKey = null;
+    if (videos && videos.results) {
+      /* Prioridade: Trailer oficial PT → Trailer EN → qualquer Trailer YT */
+      const ytVideos = videos.results.filter(v => v.site === 'YouTube');
+      const trailer  = ytVideos.find(v => v.type === 'Trailer' && v.official)
+                    || ytVideos.find(v => v.type === 'Trailer')
+                    || ytVideos.find(v => v.type === 'Teaser');
+      if (trailer) trailerKey = trailer.key;
+    }
+    injectTrailer(trailerKey);
 
     /* ── Elenco: 3 atores principais ── */
     if (credits && credits.cast) {
@@ -2072,8 +2183,92 @@
     } catch { return null; }
   }
 
+  /* ── Injeta (ou remove) o iframe do trailer no modal-hero ── */
+  function injectTrailer(youtubeKey) {
+    const hero        = document.getElementById('modalHero');
+    const thumb       = document.getElementById('modalThumb');
+    const loadingEl   = document.getElementById('modalTrailerLoading');
+    const muteBadge   = document.getElementById('modalMuteBadge');
+    const playOverlay = document.getElementById('modalPlayOverlay');
+
+    /* Remove iframe anterior, se existir */
+    const oldIframe = hero.querySelector('.modal-trailer-iframe');
+    if (oldIframe) oldIframe.remove();
+
+    if (!youtubeKey) {
+      /* Fallback: mantém a imagem de backdrop visível */
+      thumb.style.opacity = '1';
+      loadingEl.classList.add('hidden');
+      muteBadge.classList.remove('visible');
+      playOverlay.style.display = '';
+      return;
+    }
+
+    /* Há trailer: mostra spinner, esconde botão Play */
+    loadingEl.classList.remove('hidden');
+    playOverlay.style.display = 'none';
+
+    /* Parâmetros do embed:
+       autoplay=1  → arranca automaticamente
+       mute=1      → sem som (necessário para autoplay funcionar nos browsers)
+       controls=0  → sem barra de controlos
+       loop=1      → repetição contínua
+       playlist    → necessário para loop funcionar
+       rel=0       → sem vídeos relacionados no fim
+       modestbranding=1 → logo YT minimalista */
+    const params = new URLSearchParams({
+      autoplay: 1, mute: 1, controls: 0,
+      loop: 1, playlist: youtubeKey,
+      rel: 0, modestbranding: 1,
+      iv_load_policy: 3,   /* sem anotações */
+      disablekb: 1,        /* sem atalhos de teclado */
+      enablejsapi: 1       /* permite controlo via postMessage */
+    });
+
+    const iframe = document.createElement('iframe');
+    iframe.className = 'modal-trailer-iframe';
+    iframe.src       = `https://www.youtube-nocookie.com/embed/${youtubeKey}?${params}`;
+    iframe.title     = 'Trailer do filme';
+    iframe.allow     = 'autoplay; encrypted-media';
+    iframe.setAttribute('allowfullscreen', '');
+
+    /* Quando o iframe carregar: esconde spinner, fade-out da imagem, mostra badge */
+    iframe.addEventListener('load', () => {
+      /* Pequeno delay para o vídeo começar a reproduzir antes de esconder a imagem */
+      setTimeout(() => {
+        thumb.style.opacity = '0';
+        loadingEl.classList.add('hidden');
+        muteBadge.classList.add('visible');
+      }, 800);
+    });
+
+    /* Insere antes da vinheta (que fica sempre por cima) */
+    hero.insertBefore(iframe, hero.querySelector('.modal-hero-vignette'));
+  }
+
+  /* ── Para o trailer ao fechar o modal ── */
+  function stopTrailer() {
+    const hero = document.getElementById('modalHero');
+    const iframe = hero.querySelector('.modal-trailer-iframe');
+    if (iframe) {
+      /* Envia comando "stopVideo" via postMessage (YouTube IFrame API) */
+      iframe.contentWindow?.postMessage('{"event":"command","func":"stopVideo","args":""}', '*');
+      iframe.remove();
+    }
+    /* Repõe a imagem de backdrop e o botão Play */
+    const thumb = document.getElementById('modalThumb');
+    if (thumb) thumb.style.opacity = '1';
+    const muteBadge = document.getElementById('modalMuteBadge');
+    if (muteBadge) muteBadge.classList.remove('visible');
+    const playOverlay = document.getElementById('modalPlayOverlay');
+    if (playOverlay) playOverlay.style.display = '';
+    const loadingEl = document.getElementById('modalTrailerLoading');
+    if (loadingEl) loadingEl.classList.add('hidden');
+  }
+
   /* Fecha o modal */
   function closeModal() {
+    stopTrailer();
     modalEl.classList.remove('is-open');
     document.body.style.overflow = '';
   }
@@ -2341,8 +2536,11 @@
       const poster = movie.poster_path
         ? `${TMDB_IMG_BASE}${movie.poster_path}`
         : TMDB_PLACEHOLDER;
+      const backdrop = movie.backdrop_path
+        ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
+        : poster;
       const genre  = getGenreName(movie.genre_ids);
-      const heroMovieData = buildGenericMovie(title, poster, year || '—', genre, movie.id);
+      const heroMovieData = buildGenericMovie(title, poster, year || '—', genre, movie.id, backdrop);
       /* Substitui a sinopse genérica pela real da API */
       heroMovieData.synopsis = movie.overview || heroMovieData.synopsis;
 
