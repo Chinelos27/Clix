@@ -1587,9 +1587,215 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* ══════════════════════════════════════
+     ECRÃ DE PERFIS
+  ══════════════════════════════════════ */
+
+  /* Quando os perfis estão activos, esconde o site e bloqueia scroll */
+  body.profiles-active { overflow: hidden; }
+  body.profiles-active #mainWrapper { opacity: 0; pointer-events: none; }
+
+  /* Wrapper do site — transição de fade in */
+  #mainWrapper {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+  }
+
+  /* ── Ecrã de perfis ── */
+  #profileScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Fade out ao sair */
+    opacity: 1;
+    transition: opacity 0.55s ease;
+  }
+  #profileScreen.hiding {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #profileScreen.gone {
+    display: none;
+  }
+
+  /* Logo CLIX no topo do ecrã de perfis */
+  #profileScreen::before {
+    content: 'CLIX';
+    position: absolute;
+    top: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    color: var(--red);
+    letter-spacing: 0.12em;
+  }
+
+  .profile-screen-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    animation: profileFadeUp 0.6s ease both;
+  }
+  @keyframes profileFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .profile-screen-title {
+    font-family: var(--font-body);
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* Grid de perfis */
+  .profile-grid {
+    display: flex;
+    gap: clamp(20px, 3vw, 40px);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Card de perfil individual */
+  .profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    /* Entrada escalonada */
+    animation: profileCardIn 0.5s ease both;
+  }
+  .profile-card:nth-child(1) { animation-delay: 0.05s; }
+  .profile-card:nth-child(2) { animation-delay: 0.12s; }
+  .profile-card:nth-child(3) { animation-delay: 0.19s; }
+  .profile-card:nth-child(4) { animation-delay: 0.26s; }
+  @keyframes profileCardIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+
+  /* Avatar quadrado com cantos arredondados */
+  .profile-avatar {
+    width: clamp(80px, 12vw, 130px);
+    height: clamp(80px, 12vw, 130px);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid transparent;
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .profile-avatar span {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    color: rgba(255,255,255,0.92);
+    letter-spacing: 0.05em;
+    user-select: none;
+  }
+
+  /* Hover — cresce e ganha borda branca */
+  .profile-card:hover .profile-avatar,
+  .profile-card:focus-visible .profile-avatar {
+    transform: scale(1.08);
+    border-color: #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  /* Click — pequeno "press" */
+  .profile-card:active .profile-avatar {
+    transform: scale(1.03);
+  }
+
+  /* Nome do perfil */
+  .profile-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .profile-card:hover .profile-name,
+  .profile-card:focus-visible .profile-name {
+    color: var(--text);
+  }
+
+  /* Dica em baixo */
+  .profile-screen-hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Avatar na Navbar (actualizado ao escolher perfil) ── */
+  .nav-avatar {
+    transition: background 0.3s ease, box-shadow 0.2s ease;
+  }
+  .nav-avatar:hover {
+    box-shadow: 0 0 0 2px #fff;
+  }
+
 </style>
 </head>
-<body>
+<body class="profiles-active">
+
+<!-- ══════════════════════════════════════
+     ECRÃ DE SELEÇÃO DE PERFIS
+══════════════════════════════════════ -->
+<div id="profileScreen">
+  <div class="profile-screen-inner">
+    <h1 class="profile-screen-title">Quem está a ver?</h1>
+    <div class="profile-grid">
+
+      <button class="profile-card" data-name="Miguel" data-color="#E5173F" data-initials="MR">
+        <div class="profile-avatar" style="background:linear-gradient(135deg,#E5173F,#9B0E29)">
+          <span>MR</span>
+        </div>
+        <div class="profile-name">Miguel</div>
+      </button>
+
+      <button class="profile-card" data-name="Ana" data-color="#7C3AED" data-initials="AS">
+        <div class="profile-avatar" style="background:linear-gradient(135deg,#7C3AED,#4C1D95)">
+          <span>AS</span>
+        </div>
+        <div class="profile-name">Ana</div>
+      </button>
+
+      <button class="profile-card" data-name="João" data-color="#0EA5E9" data-initials="JF">
+        <div class="profile-avatar" style="background:linear-gradient(135deg,#0EA5E9,#075985)">
+          <span>JF</span>
+        </div>
+        <div class="profile-name">João</div>
+      </button>
+
+      <button class="profile-card" data-name="Crianças" data-color="#F59E0B" data-initials="👶">
+        <div class="profile-avatar" style="background:linear-gradient(135deg,#F59E0B,#B45309)">
+          <span>👶</span>
+        </div>
+        <div class="profile-name">Crianças</div>
+      </button>
+
+    </div>
+    <p class="profile-screen-hint">Clica num perfil para entrar</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SITE PRINCIPAL (oculto até escolher perfil)
+══════════════════════════════════════ -->
+<div id="mainWrapper">
 
 <!-- ══════════════════════════════════════
      NAVBAR
@@ -1638,7 +1844,7 @@
       <span class="notif-dot"></span>
     </button>
     <!-- Avatar -->
-    <div class="nav-avatar" title="Perfil">MR</div>
+    <div class="nav-avatar" id="navAvatar" title="Mudar perfil" style="cursor:pointer"></div>
     <!-- Hamburger (mobile) -->
     <button class="nav-hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -3609,8 +3815,121 @@
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* ── Inicia a integração TMDB ── */
-  initTMDB();
+  /* ════════════════════════════════════════
+     ECRÃ DE PERFIS — LÓGICA
+  ════════════════════════════════════════ */
+
+  const PROFILES = {
+    'Miguel'   : { initials: 'MR', color: 'linear-gradient(135deg,#E5173F,#9B0E29)' },
+    'Ana'      : { initials: 'AS', color: 'linear-gradient(135deg,#7C3AED,#4C1D95)' },
+    'João'     : { initials: 'JF', color: 'linear-gradient(135deg,#0EA5E9,#075985)' },
+    'Crianças' : { initials: '👶', color: 'linear-gradient(135deg,#F59E0B,#B45309)' },
+  };
+
+  /* ── updateNavAvatar ──────────────────────────────────────
+     Actualiza o avatar da navbar com as cores/iniciais do perfil.
+  ──────────────────────────────────────────────────────── */
+  function updateNavAvatar(name) {
+    const navAvatar = document.getElementById('navAvatar');
+    if (!navAvatar) return;
+    const profile = PROFILES[name];
+    if (!profile) return;
+    navAvatar.textContent    = profile.initials;
+    navAvatar.style.background = profile.color;
+    navAvatar.title          = `Perfil: ${name}`;
+  }
+
+  /* ── enterWithProfile ─────────────────────────────────────
+     Chamada ao clicar num perfil:
+     1. Guarda o perfil no localStorage
+     2. Anima o ecrã de saída (fade out)
+     3. Mostra o site (fade in) e arranca a API
+  ──────────────────────────────────────────────────────── */
+  function enterWithProfile(name) {
+    /* Persiste a escolha */
+    try { localStorage.setItem('clix_profile', name); } catch {}
+
+    /* Actualiza avatar imediatamente */
+    updateNavAvatar(name);
+
+    const screen     = document.getElementById('profileScreen');
+    const mainWrapper = document.getElementById('mainWrapper');
+
+    /* Fase 1: fade out do ecrã de perfis */
+    screen.classList.add('hiding');
+
+    /* Fase 2: depois de 550ms (duração do fade), mostra o site */
+    setTimeout(() => {
+      screen.classList.add('gone');           /* remove do layout */
+      document.body.classList.remove('profiles-active'); /* desbloqueia scroll */
+      mainWrapper.style.opacity = '1';        /* fade in do site */
+
+      /* Arranca a integração TMDB AGORA (não antes, para não bloquear o ecrã) */
+      initTMDB();
+    }, 550);
+  }
+
+  /* ── Verificar se já existe perfil guardado ───────────────
+     Se o utilizador já escolheu, salta o ecrã de perfis.
+  ──────────────────────────────────────────────────────── */
+  (function checkSavedProfile() {
+    let saved = null;
+    try { saved = localStorage.getItem('clix_profile'); } catch {}
+
+    if (saved && PROFILES[saved]) {
+      /* Entra directamente, sem animação */
+      const screen      = document.getElementById('profileScreen');
+      const mainWrapper = document.getElementById('mainWrapper');
+      screen.classList.add('gone');
+      document.body.classList.remove('profiles-active');
+      mainWrapper.style.opacity = '1';
+      updateNavAvatar(saved);
+      /* API arranca imediatamente */
+      initTMDB();
+    } else {
+      /* Adiciona listeners aos cards de perfil */
+      document.querySelectorAll('.profile-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const name = card.dataset.name;
+          /* Efeito de "pulse" no card clicado antes do fade */
+          card.querySelector('.profile-avatar').style.transform = 'scale(1.15)';
+          setTimeout(() => enterWithProfile(name), 180);
+        });
+      });
+    }
+  })();
+
+  /* ── Avatar na navbar → volta ao ecrã de perfis ──────────
+     Clique no avatar da navbar mostra o ecrã de perfis novamente.
+  ──────────────────────────────────────────────────────── */
+  document.getElementById('navAvatar')?.addEventListener('click', () => {
+    const screen      = document.getElementById('profileScreen');
+    const mainWrapper = document.getElementById('mainWrapper');
+
+    screen.classList.remove('gone', 'hiding');
+    mainWrapper.style.opacity = '0';
+    document.body.classList.add('profiles-active');
+
+    /* Relança a animação de entrada dos cards */
+    document.querySelectorAll('.profile-card').forEach(c => {
+      c.style.animation = 'none';
+      c.offsetHeight; /* reflow */
+      c.style.animation = '';
+    });
+
+    /* Reagarra os listeners (podem ter sido perdidos se o DOM foi recriado) */
+    document.querySelectorAll('.profile-card').forEach(card => {
+      const newCard = card.cloneNode(true);
+      card.parentNode.replaceChild(newCard, card);
+      newCard.addEventListener('click', () => {
+        newCard.querySelector('.profile-avatar').style.transform = 'scale(1.15)';
+        setTimeout(() => enterWithProfile(newCard.dataset.name), 180);
+      });
+    });
+  });
+
+  /* ── initTMDB é chamado por enterWithProfile, não aqui ── */
+  /* initTMDB(); ← removido daqui propositadamente */
 
   /* ── "Limpar tudo" na secção A Minha Lista ── */
   document.getElementById('clearMyListBtn')?.addEventListener('click', () => {
@@ -3778,5 +4097,6 @@
 <!-- Toast de feedback (add/remove da lista) -->
 <div id="clixToast" class="clix-toast" role="status" aria-live="polite"></div>
 
+</div><!-- /#mainWrapper -->
 </body>
 </html>
